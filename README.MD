@@ -1,2 +1,6 @@
-# Ik ben een spinnetje
-## Welkom in mijn web
+# IDP Spin project
+
+## Firmware
+### Development environment
+
+## Deployment
