@@ -1,0 +1,149 @@
+@model idpSpin.Models.Spin
+
+@{
+    ViewData["Title"] = "Delete";
+}
+
+<h2>Delete</h2>
+
+<h3>Are you sure you want to delete this?</h3>
+<div>
+    <h4>Spin</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <input type="hidden" asp-for="Id" />
+        <dt>
+            @Html.DisplayNameFor(model => model.Servo1)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Servo1)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Servo2)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Servo2)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Servo3)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Servo3)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Servo4)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Servo4)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Servo5)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Servo5)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Servo6)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Servo6)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Servo7)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Servo7)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Servo8)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Servo8)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Servo9)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Servo9)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Servo10)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Servo10)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Servo11)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Servo11)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Servo12)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Servo12)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Servo13)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Servo13)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Servo14)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Servo14)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Servo15)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Servo15)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Servo16)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Servo16)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Servo17)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Servo17)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Servo18)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Servo18)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.HellingSensor)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.HellingSensor)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Tijd)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Tijd)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.GeluidSensor)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.GeluidSensor)
+        </dd>
+    </dl>
+    
+    <form asp-action="Delete">
+        <div class="form-actions no-color">
+            <input type="submit" value="Delete" class="btn btn-default" /> |
+            <a asp-action="Index">Back to List</a>
+        </div>
+    </form>
+</div>
