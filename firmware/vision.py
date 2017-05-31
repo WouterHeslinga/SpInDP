@@ -26,7 +26,7 @@ def best_matching_shape(contours, shape):
         
         match_value = cv2.matchShapes(contour, shape, 1, 0.0)
         # Skip contour if there was a contour that has a better match
-        if match_value > .2 or match_value > best_value:
+        if match_value > .1 or match_value > best_value:
             continue
         
         best_shape = contour
@@ -58,9 +58,9 @@ def color_filter(hsv, color):
     """Filters the hsv values with the given color, the options are 'red' and 'black'"""
     result = None
     if color == 'red':
-        result = cv2.inRange(hsv, (0, 130, 60), (19, 255, 255))
+        result = cv2.inRange(hsv, (0, 161, 80), (255, 255, 255))
         # HSV colors hue is in 360 deg, so we need values in the negative. Use a seccond range and bitwise those.
-        result = cv2.bitwise_or(result, cv2.inRange(hsv, (158, 137, 60), (182, 255, 255)))
+        # result = cv2.bitwise_or(result, cv2.inRange(hsv, (158, 137, 60), (182, 255, 255)))
     elif color == 'black':
         result = cv2.inRange(hsv, (0, 0, 0), (179, 255, 100))
     else:
@@ -74,32 +74,42 @@ if __name__ == '__main__':
     for key, val in shapes.items():
         print('%s: %s' % (key, cv2.contourArea(val)))
     
-    frame = cv2.imread('assets/ref.jpg')
-    
-    blur = cv2.GaussianBlur(frame, (7,7), 0)
-    hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+    cap = cv2.VideoCapture(0)
 
-    red = color_filter(hsv, 'red')
-    _, red_contours, _ = cv2.findContours(red, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    while True:
+        _, frame = cap.read()
+        
+        blur = cv2.GaussianBlur(frame, (7,7), 0)
+        hsv = cv2.cvtColor(blur, cv2.COLOR_BGR2HSV)
 
-    black = color_filter(hsv, 'black')
-    _, black_contours, _ = cv2.findContours(black, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        red = color_filter(hsv, 'red')
+        _, red_contours, _ = cv2.findContours(red, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
-    heart = best_matching_shape(red_contours, shapes['heart'])
-    if heart is not None:
-        frame = cv2.drawContours(frame, [heart], 0, (190, 190, 90), 3)
-    
-    diamond = best_matching_shape(red_contours, shapes['diamond'])
-    if diamond is not None:
-        frame = cv2.drawContours(frame, [diamond], 0, (0, 255, 0), 3)
+        black = color_filter(hsv, 'black')
+        _, black_contours, _ = cv2.findContours(black, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
-    spade = best_matching_shape(black_contours, shapes['spade'])
-    if spade is not None:
-        frame = cv2.drawContours(frame, [spade], 0, (180, 10, 0), 3)
+        cv2.imshow('red', red)
+        cv2.imshow('black', black)
 
-    club = best_matching_shape(black_contours, shapes['club'])
-    if club is not None:
-        frame = cv2.drawContours(frame, [club], 0, (0, 10, 180), 3)
+        heart = best_matching_shape(red_contours, shapes['heart'])
+        if heart is not None:
+            frame = cv2.drawContours(frame, [heart], 0, (190, 190, 90), 3)
+        
+        diamond = best_matching_shape(red_contours, shapes['diamond'])
+        if diamond is not None:
+            frame = cv2.drawContours(frame, [diamond], 0, (0, 255, 0), 3)
 
-    cv2.imshow('Output', frame)
-    cv2.waitKey(0)
+        spade = best_matching_shape(black_contours, shapes['spade'])
+        if spade is not None:
+            frame = cv2.drawContours(frame, [spade], 0, (180, 10, 0), 3)
+
+        club = best_matching_shape(black_contours, shapes['club'])
+        if club is not None:
+            frame = cv2.drawContours(frame, [club], 0, (0, 10, 180), 3)
+        
+        cv2.imshow('Output', frame) 
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+
+    cap.release()
+    cv2.destroyAllWindows()
