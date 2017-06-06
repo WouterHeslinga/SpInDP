@@ -1,26 +1,34 @@
-from flask import Flask, Response, render_template
-import cv2
+import multiprocessing
+from time import sleep
+from web import Web
 
-cam = cv2.VideoCapture(0)
-app = Flask(__name__)
+def vision_worker(q):
+    """Worker for the vision"""
+    print("Starting Vision Worker")
+    for i in range(10):
+        print("Polling vision")
+        sleep(1)
+    print('Stopping vision worker')
+    return
 
-def stream():
-    while True:
-        ret, frame = cam.read()
-        dingen = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        ret, jpg = cv2.imencode('.jpg', dingen)
-        jpg_bytes = jpg.tobytes()
-        yield (b'--frame\r\n'
-               b'Content-Type: image/jpeg\r\n\r\n' + jpg_bytes + b'\r\n')
-
-@app.route('/video_feed')
-def video_feed():
-    return Response(stream(),
-                    mimetype='multipart/x-mixed-replace; boundary=frame')
-
-@app.route('/')
-def index():
-    return render_template('index.html')
+def web_Worker(q):
+    """Worker for the web interface"""
+    print("Starting web Worker")
+    web = Web()
+    web.run()
+    return
 
 if __name__ == '__main__':
-    app.run()
+    workers = []
+    queue_vision_web = multiprocessing.Queue()
+
+    workers.append(multiprocessing.Process(target=vision_worker, args=(queue_vision_web,)))
+    workers.append(multiprocessing.Process(target=web_Worker, args=(queue_vision_web,)))
+
+    # Start the workers
+    for worker in workers:
+        worker.start()
+
+    # Join the workers
+    for worker in workers:
+        worker.join()
