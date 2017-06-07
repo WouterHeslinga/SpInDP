@@ -3,7 +3,8 @@ import numpy as np
 
 class Vision:
     """Vision Class"""
-    def __init__(self, show_feed):
+    def __init__(self, show_feed, queue):
+        self.queue = queue
         self.cap = cv2.VideoCapture(0)
         self.show_feed = show_feed
         self.status = {
@@ -26,18 +27,18 @@ class Vision:
         hsv = cv2.cvtColor(blur, cv2.COLOR_BGR2HSV)
 
         # Detect the shapes
-        self.process_shapes(hsv)
+        self.process_shapes(hsv, frame.copy() if self.show_feed else None)
 
-    def process_shapes(self, hsv):
+        self.queue.put(self.status)
+        cv2.waitKey(10)
+
+    def process_shapes(self, hsv, render_frame=None):
         """Detects the four symbols"""
         # Find the contours
         red = self.color_filter(hsv, 'red')
         _, red_contours, _ = cv2.findContours(red, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         black = self.color_filter(hsv, 'black')
         _, black_contours, _ = cv2.findContours(black, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-
-        # Copy the image if show_feed is true to view the results of shape detection
-        res_frame = hsv.copy()
 
         # Match each individual shapes
         for shape in self.shapes:
@@ -46,12 +47,12 @@ class Vision:
             self.status['symbols'][shape] = found_contour is not None
 
             # Draw contour if show_Feed is true
-            if found_contour is not None and self.show_feed is True:
+            if found_contour is not None and render_frame is not None:
                 print("Found %s" % shape)
-                res_frame = cv2.drawContours(res_frame, [found_contour], 0, (0, 255, 0), 3)
+                render_frame = cv2.drawContours(render_frame, [found_contour], 0, (0, 255, 0), 3)
         
         if self.show_feed:
-            cv2.imshow(shape, res_frame)
+            cv2.imshow(shape, render_frame)
     
     def show_image(self, name, frame):
         if not self.show_feed:
@@ -83,7 +84,7 @@ class Vision:
             
             match_value = cv2.matchShapes(contour, shape, 1, 0.0)
             # Skip contour if there was a contour that has a better match
-            if match_value > .1 or match_value > best_value:
+            if match_value > .02 or match_value > best_value:
                 continue
             
             best_shape = contour
