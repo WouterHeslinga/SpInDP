@@ -84,7 +84,7 @@ class Vision:
             
             match_value = cv2.matchShapes(contour, shape, 1, 0.0)
             # Skip contour if there was a contour that has a better match
-            if match_value > .02 or match_value > best_value:
+            if match_value > .05 or match_value > best_value:
                 continue
             
             best_shape = contour
@@ -132,3 +132,5 @@ if __name__ == '__main__':
     vision = Vision(True)
     vision.update()
     cv2.waitKey()
+
+    
