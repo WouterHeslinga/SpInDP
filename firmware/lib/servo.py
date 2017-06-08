@@ -49,7 +49,7 @@ def mapServos():
     servos = []
     
     mappingData = ""
-    f = open('../config/mappingData', 'w')
+    f = open('mappingData', 'w')
     
     print("\nServo setup")
     #18 servo's
@@ -85,7 +85,7 @@ def mapServos():
 
 def readServoMappings():
     servos = []
-    f = open('../config/mappingData', 'r')
+    f = open('mappingData', 'r')
 
     print("\nSearching servo's")
     for x in range (1,19):
