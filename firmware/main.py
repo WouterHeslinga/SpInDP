@@ -32,10 +32,10 @@ def motion_controller_worker():
 
 def bluetooth_server_worker():
     """Worker for the bluetooth server"""
-    print("Starting bluetooth server worker")
-    bluetooth = BluetoothServer()
-    bluetooth.update()
-
+    print("Starting bluetooth debugApp worker")
+    bluetoothapp = BluetoothServer("debugApp", [1-6], [1-18])
+    print("Starting bluetooth controller worker")
+    bluetoothcontroller = BluetoothServer("controller", [1-6], [1-18])
 
 if __name__ == '__main__':
     workers = []

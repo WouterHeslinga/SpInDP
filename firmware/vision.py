@@ -115,7 +115,7 @@ class Vision:
         result = None
         if color == 'red':
             result = cv2.inRange(hsv, (0, 161, 80), (255, 255, 255))
-            # HSV colors hue is in 360 deg, so we need values in the negative. Use a seccond range and bitwise those.
+            # HSV colors hue is in 360 deg, so we need values in the negative. Use a second range and bitwise those.
             # result = cv2.bitwise_or(result, cv2.inRange(hsv, (158, 137, 60), (182, 255, 255)))
         elif color == 'black':
             result = cv2.inRange(hsv, (0, 0, 0), (179, 255, 100))
@@ -127,10 +127,8 @@ class Vision:
         self.cap.release()
         cv2.destroyAllWindows()
 
-# If executed instaid of import show a little demo
+# If executed instead of import show a little demo
 if __name__ == '__main__':
     vision = Vision(True)
     vision.update()
     cv2.waitKey()
-
-    
