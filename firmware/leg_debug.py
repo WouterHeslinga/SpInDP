@@ -1,11 +1,11 @@
 #!/usr/bin/python3
 
-import connection as connection
-import debug as debug
-import debugKinematics as debugIk
-import leg as leg
-import servo as servo
-import kinematics as ik
+import lib.connection as connection
+import lib.debug as debug
+import lib.debugKinematics as debugIk
+import lib.leg as leg
+import lib.servo as servo
+import lib.kinematics as ik
 
 import serial
 import threading
@@ -268,4 +268,5 @@ def mapLegs():
     return legs
 
 #execute main loop
-main()
+if __name__ == '__main__':
+    main()

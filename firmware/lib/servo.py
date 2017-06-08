@@ -49,7 +49,7 @@ def mapServos():
     servos = []
     
     mappingData = ""
-    f = open('mappingData', 'w')
+    f = open('../config/mappingData', 'w')
     
     print("\nServo setup")
     #18 servo's
