@@ -40,6 +40,11 @@ class Vision:
         black = self.color_filter(hsv, 'black')
         _, black_contours, _ = cv2.findContours(black, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
+        # render threshold
+        if render_frame is not None:
+            cv2.imshow('black', black)
+            cv2.imshow('red', red)
+
         # Match each individual shapes
         for shape in self.shapes:
             contour = self.shape_contours[shape]
@@ -49,7 +54,18 @@ class Vision:
             # Draw contour if show_Feed is true
             if found_contour is not None and render_frame is not None:
                 print("Found %s" % shape)
-                render_frame = cv2.drawContours(render_frame, [found_contour], 0, (0, 255, 0), 3)
+                
+                color = None
+                if shape == 'heart':
+                    color = (0, 255, 0)
+                if shape == 'diamond':
+                    color = (50, 200, 60)
+                if shape == 'spade':
+                    color = (90, 90, 30)
+                if shape == 'club':
+                    color = (100, 20, 20)
+
+                render_frame = cv2.drawContours(render_frame, [found_contour], 0, color, 3)
         
         if self.show_feed:
             cv2.imshow(shape, render_frame)
@@ -79,12 +95,12 @@ class Vision:
         
         for contour in contours:
             # Skip if contour is too small
-            if cv2.contourArea(contour) < 100:
+            if cv2.contourArea(contour) < 1000:
                 continue
             
             match_value = cv2.matchShapes(contour, shape, 1, 0.0)
             # Skip contour if there was a contour that has a better match
-            if match_value > .02 or match_value > best_value:
+            if match_value > .05 or match_value > best_value:
                 continue
             
             best_shape = contour
@@ -114,7 +130,7 @@ class Vision:
         """Filters the hsv values with the given color, the options are 'red' and 'black'"""
         result = None
         if color == 'red':
-            result = cv2.inRange(hsv, (0, 161, 80), (255, 255, 255))
+            result = cv2.inRange(hsv, (0, 180, 80), (255, 240, 255))
             # HSV colors hue is in 360 deg, so we need values in the negative. Use a seccond range and bitwise those.
             # result = cv2.bitwise_or(result, cv2.inRange(hsv, (158, 137, 60), (182, 255, 255)))
         elif color == 'black':
@@ -132,3 +148,5 @@ if __name__ == '__main__':
     vision = Vision(True)
     vision.update()
     cv2.waitKey()
+
+    
