@@ -31,7 +31,7 @@ class BluetoothServer:
         while True:
             client, address = self.socket.accept()
             clinet.settimeout(60)
-            worker = threading.Thread(target=worker, args(client, address))
+            worker = threading.Thread(target=worker, args=(client, address))
             self.workers.append(worker)
             worker.start()
 
