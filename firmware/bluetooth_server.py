@@ -34,4 +34,4 @@ class BluetoothServer:
                     raise "Client disconnected"
             except:
                 client.close()
-                return false
+                return False
