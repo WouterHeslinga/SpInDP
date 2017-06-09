@@ -74,7 +74,7 @@ class leg (threading.Thread):
 
         
     def walk(self,x = 130.19, y = 0, z = 74.90):
-        timeout = 0.2
+        timeout = 0.15
         #                    x    y    z
         #initial feet pos 130.19, 0, 74.90
         startPos = [x,y,z]
@@ -82,10 +82,9 @@ class leg (threading.Thread):
         
         self.move(ik.legIk(startPos[0], startPos[1] , startPos[2]))
         
-        sleep(0.7)
         
         if self.id % 2 == 0:
-            y += 28
+            y += 27
             self.move(ik.legIk(x, y, z))
 
             sleep(timeout)
@@ -93,18 +92,18 @@ class leg (threading.Thread):
             self.move(ik.legIk(x, y, z))
 
             while self.checkNewTask() == False:
-                y -= 56
+                y -= 54
                 self.move(ik.legIk(x, y, z))
 
                 sleep(timeout)
                  
-                y += 56
-                z += 40
+                y += 54
+                z += 30
                 self.move(ik.legIk(x, y, z))
                     
                 sleep(timeout)
 
-                z -= 40
+                z -= 30
                 self.move(ik.legIk(x, y, z))
                 sleep(timeout)
 
@@ -112,7 +111,7 @@ class leg (threading.Thread):
                    
         elif self.id % 2 != 0:
             
-            y -= 28
+            y -= 27
             self.move(ik.legIk(x, y, z))
 
             sleep(timeout)
@@ -120,25 +119,25 @@ class leg (threading.Thread):
             self.move(ik.legIk(x, y, z))
             
             while self.checkNewTask() == False:
-                y += 56
-                z += 40
+                y += 54
+                z += 30
                 self.move(ik.legIk(x, y, z))
     
                 sleep(timeout)
     
-                z -= 40
+                z -= 30
                 self.move(ik.legIk(x, y, z))
                     
                 sleep(timeout)
 
-                y -= 56
+                y -= 54
                 self.move(ik.legIk(x, y, z))
 
                 sleep(timeout)
 
 
     def walkBackwards(self,x = 130.19, y = 0, z = 74.90):
-        timeout = 0.2
+        timeout = 0.15
         #                    x    y    z
         #initial feet pos 130.19, 0, 74.90
         startPos = [x,y,z]
@@ -149,7 +148,7 @@ class leg (threading.Thread):
         sleep(0.7)
         
         if self.id % 2 == 0:
-            y -= 28
+            y -= 27
             self.move(ik.legIk(x, y, z))
 
             sleep(timeout)
@@ -157,18 +156,18 @@ class leg (threading.Thread):
             self.move(ik.legIk(x, y, z))
 
             while self.checkNewTask() == False:
-                y += 56
+                y += 54
                 self.move(ik.legIk(x, y, z))
 
                 sleep(timeout)
                  
-                y -= 56
-                z += 40
+                y -= 54
+                z += 30
                 self.move(ik.legIk(x, y, z))
                     
                 sleep(timeout)
 
-                z -= 40
+                z -= 30
                 self.move(ik.legIk(x, y, z))
                 sleep(timeout)
 
@@ -176,7 +175,7 @@ class leg (threading.Thread):
                    
         elif self.id % 2 != 0:
             
-            y += 28
+            y += 27
             self.move(ik.legIk(x, y, z))
 
             sleep(timeout)
@@ -184,18 +183,18 @@ class leg (threading.Thread):
             self.move(ik.legIk(x, y, z))
             
             while self.checkNewTask() == False:
-                y -= 56
-                z += 40
+                y -= 54
+                z += 30
                 self.move(ik.legIk(x, y, z))
     
                 sleep(timeout)
     
-                z -= 40
+                z -= 30
                 self.move(ik.legIk(x, y, z))
                     
                 sleep(timeout)
 
-                y += 56
+                y += 54
                 self.move(ik.legIk(x, y, z))
 
                 sleep(timeout)

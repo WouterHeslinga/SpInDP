@@ -58,15 +58,12 @@ def main():
     while True:
         try:
             #getInput = "f"
-            getInput = raw_input("\ndirections (f/b/l/r) d (rest/test) commands (c_c/c_d/debug/reread/remap/quit): ")
+            getInput = raw_input("\ndirections (f/b/l/r) (idle/test) commands (c_c/c_d/debug/reread/remap/quit): ")
             if input != getInput:
                 input = getInput
     
             if input == "test":
                 setLegs(450,700,512)
-            elif input == "rest":
-                for leg in legs:
-                    leg.taskList.put("idle")
                     
             elif input == "f":
                 for leg in legs:
@@ -76,6 +73,10 @@ def main():
             elif input == "b":
                 for leg in legs:
                     leg.taskList.put("b")
+                    
+            elif input == "idle":
+                for leg in legs:
+                    leg.taskList.put("idle")
 
             elif input == "c_d":
                 if c_debugApp.isAlive() == False:
