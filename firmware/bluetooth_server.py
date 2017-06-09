@@ -1,27 +1,15 @@
-from socket import socket, SOL_SOCKET, SO_REUSEADDR, error
+import socket
 import json
 import threading
 
 from time import sleep
 from random import randint
 
-class BluetoothWorker:
-    def __init__(self, port):
-        self.port = port
-        self.socket = socket(socket.AF_BLUETOOTH, socket.SOCK_STREAM, socket.BTPROTO_RFCOMM)
-    
-    def start(self):
-        try:
-            self.socket.bind(("00:1A:7D:DA:71:12", self.port))
-            self.socket.listen(5)
-        except:
-            print "Whoeps?"
-
 class BluetoothServer:
     def __init__(self, queue, port=1):
         self.workers = []
         self.port = port
-        self.socket = socket(socket.AF_BLUETOOTH, socket.SOCK_STREAM, socket.BTPROTO_RFCOMM)
+        self.socket = socket.socket(socket.AF_BLUETOOTH, socket.SOCK_STREAM, socket.BTPROTO_RFCOMM)
 
     def run(self):
         print("Starting server")
