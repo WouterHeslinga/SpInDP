@@ -24,7 +24,7 @@ class serverThread (threading.Thread):
 		if self.name == "debugApp":
                         self.startDebugAppServer()
                 elif self.name == "controller":
-                        self.startControllerServer()
+                        self.startControllerServerDebug()
 	def stop(self):
                 print "Trying to close socket...",
 		try:
@@ -49,7 +49,7 @@ class serverThread (threading.Thread):
                 self.socket.bind((hostMACAddress,port))
                 self.socket.listen(backlog)
 
-	def startDebugAppServer2(self):
+	def startDebugAppServer(self):
                 #bind a server port to listen for incoming connections
                 self.bind_and_listen('00:1A:7D:DA:71:12', 3)
 
@@ -98,13 +98,13 @@ class serverThread (threading.Thread):
 				self.socket.close()
 				break
 
-	def startDebugAppServer(self):
+	def startControllerServerDebug(self):
                 #bind a server port to listen for incoming connections
-                self.bind_and_listen('00:1A:7D:DA:71:12', 3)
+                self.bind_and_listen('00:1A:7D:DA:71:12', 1)
 
 		while self.stopSign == False:
 			try:
-                                self.s_print("Hey ritseart, Waiting for a connection...")
+                                self.s_print("Waiting for a connection...")
 				client, address = self.socket.accept()
 				self.s_print("Connection accepted")
 
