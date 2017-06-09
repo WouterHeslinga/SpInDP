@@ -33,6 +33,7 @@ def bluetooth_server_worker(queue):
     """Worker for the bluetooth server"""
     print("Starting bluetooth worker")
     bluetooth = BluetoothServer(queue, 1)
+    bluetooth.run()
 
 if __name__ == '__main__':
     workers = []
