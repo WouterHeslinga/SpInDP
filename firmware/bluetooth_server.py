@@ -14,15 +14,14 @@ class BluetoothWorker:
         try:
             self.socket.bind(("00:1A:7D:DA:71:12", self.port))
             self.socket.listen(5)
-
+        except:
+            print "Whoeps?"
 
 class BluetoothServer:
     def __init__(self, queue, port=1):
         self.workers = []
         self.port = port
         self.socket = socket(socket.AF_BLUETOOTH, socket.SOCK_STREAM, socket.BTPROTO_RFCOMM)
-        
-
 
     def run(self):
         print("Starting server")
