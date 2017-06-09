@@ -10,8 +10,6 @@ class BluetoothWorker:
         self.port = port
         self.socket = socket(socket.AF_BLUETOOTH, socket.SOCK_STREAM, socket.BTPROTO_RFCOMM)
     
-    def 
-
     def start(self):
         try:
             self.socket.bind(("00:1A:7D:DA:71:12", self.port))
