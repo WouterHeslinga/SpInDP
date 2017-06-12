@@ -25,6 +25,10 @@ class BluetoothServer:
 
     def worker(self, client, address):
         size = 1024
+<<<<<<< HEAD
+=======
+        print("Clinet %s connected" % address)
+>>>>>>> 9be44f06d7d31b101071e9b6cf4c7dd61b4d3831
         while True:
             try:
                 data = client.recv(size)
@@ -34,4 +38,8 @@ class BluetoothServer:
                     raise "Client disconnected"
             except:
                 client.close()
+<<<<<<< HEAD
+=======
+                print("Client %s disconnected" % address)
+>>>>>>> 9be44f06d7d31b101071e9b6cf4c7dd61b4d3831
                 return False
