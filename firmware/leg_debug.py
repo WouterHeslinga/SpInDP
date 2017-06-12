@@ -77,6 +77,10 @@ def main():
                 for leg in legs:
                     leg.taskList.put("b")
 
+            elif input == "torque":
+                input = raw_input("torque: ")
+                for x in servos:
+                    x.setTorqueLimit(int(input))
             elif input == "c_d":
                 if c_debugApp.isAlive() == False:
                     c_debugApp.start()
@@ -209,10 +213,10 @@ class queueHandlerThread(threading.Thread):
                         time.sleep(1)
                     
                 values = self.queue.get()
-
-                print(values)
                 
                 leg = values[0]
+                if leg.id == 2:
+                    print(values)
                 speed = values[4]
                 if values[1] != -1:
                     leg.moveHip(int(values[1]),speed)

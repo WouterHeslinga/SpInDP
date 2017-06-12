@@ -92,7 +92,7 @@ class leg (threading.Thread):
             
 
         
-    def walk(self,x = 100.19, y = 0, z = 100.90):
+    def walk(self,x = 200.19, y = 0, z = 70.90):
         timeout = 1
         stepWidth = 54
         stepHeight = 40
@@ -136,7 +136,7 @@ class leg (threading.Thread):
                 sleep(timeout)
 
 
-    def walkBackwards(self,x = 100.19, y = 0, z = 100.90):
+    def walkBackwards(self,x = 170.19, y = 0, z = 100.90):
         timeout = 1
         stepWidth = 54
         stepHeight = 40
