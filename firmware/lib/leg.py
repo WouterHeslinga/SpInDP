@@ -1,6 +1,6 @@
 from time import sleep
 import threading
-import kinematics as ik
+import kinematicsTest as ik
 import math
 import Queue
 
@@ -32,7 +32,7 @@ class leg (threading.Thread):
         if addY != None:
             self.y += addY
         if addZ != None:
-            self.z += addZ
+            self.z -= addZ
 
         if setX != None:
             self.x = setX
@@ -92,8 +92,10 @@ class leg (threading.Thread):
             
 
         
-    def walk(self,x = 130.19, y = 0, z = 74.90):
-        timeout = 0.3
+    def walk(self,x = 100.19, y = 0, z = 100.90):
+        timeout = 1
+        stepWidth = 54
+        stepHeight = 40
         #                    x    y    z
         #initial feet pos 130.19, 0, 74.90)
         self.changePos(setX = x, setY = y, setZ = z)
@@ -102,40 +104,42 @@ class leg (threading.Thread):
         # even legs
         if self.id % 2 == 0:
             
-            self.changePos(addY = 27)
+            self.changePos(addY = stepWidth / 2)
             sleep(timeout)
 
             while self.checkNewTask() == False:
                 
-                self.changePos(addY = -54)
+                self.changePos(addY = -stepWidth)
                 sleep(timeout)
                  
-                self.changePos(addY = 54, addZ = 40)
+                self.changePos(addY = stepWidth, addZ = stepHeight)
                 sleep(timeout)
 
-                self.changePos(addZ = -40)
+                self.changePos(addZ = -stepHeight)
                 sleep(timeout)
 
         # uneven legs                   
         elif self.id % 2 != 0:
             
-            self.changePos(addY = -27)
+            self.changePos(addY = -stepWidth / 2)
             sleep(timeout)
             
             while self.checkNewTask() == False:
                 
-                self.changePos(addY = 54, addZ = 40)
+                self.changePos(addY = stepWidth, addZ = stepHeight)
                 sleep(timeout)
     
-                self.changePos(addZ = -40)
+                self.changePos(addZ = -stepHeight)
                 sleep(timeout)
 
-                self.changePos(addY = -54)
+                self.changePos(addY = -stepWidth)
                 sleep(timeout)
 
 
-    def walkBackwards(self,x = 130.19, y = 0, z = 74.90):
-        timeout = 0.3
+    def walkBackwards(self,x = 100.19, y = 0, z = 100.90):
+        timeout = 1
+        stepWidth = 54
+        stepHeight = 40
         #                    x    y    z
         #initial feet pos 130.19, 0, 74.90):
         self.changePos(setX = x, setY = y, setZ = z)
@@ -145,35 +149,35 @@ class leg (threading.Thread):
         # even legs
         if self.id % 2 == 0:
             
-            self.changePos(addY = -27)
+            self.changePos(addY = -stepWidth / 2)
             sleep(timeout)
 
             while self.checkNewTask() == False:
                 
-                self.changePos(addY = 54)
+                self.changePos(addY = stepWidth)
                 sleep(timeout)
                  
-                self.changePos(addY = -54, addZ = 40)
+                self.changePos(addY = -stepWidth, addZ = stepHeight)
                 sleep(timeout)
 
-                self.changePos(addZ = -40)
+                self.changePos(addZ = -stepHeight)
                 sleep(timeout)
 
         # uneven legs                   
         elif self.id % 2 != 0:
             
-            self.changePos(addY = 27)
+            self.changePos(addY = stepWidth / 2)
             sleep(timeout)
             
             while self.checkNewTask() == False:
                 
-                self.changePos(addY = -54, addZ = 40)
+                self.changePos(addY = -stepWidth, addZ = stepHeight)
                 sleep(timeout)
                 
-                self.changePos(addZ = -40)
+                self.changePos(addZ = -stepHeight)
                 sleep(timeout)
 
-                self.changePos(addY = 54)
+                self.changePos(addY = stepWidth)
                 sleep(timeout)
 
                 

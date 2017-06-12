@@ -29,8 +29,6 @@ def legIk(x = 0, y = 0, z = 0, values = None):
 	coxaalphamaxhalf = (0.5 * coxaalphamax )* radfactor
 
 	ac = math.atan(y/x) * pifactor
-	
-	acn = ac
 
 	#print (ac)
 	
@@ -38,10 +36,10 @@ def legIk(x = 0, y = 0, z = 0, values = None):
 
 	totalstep = 2 * math.sqrt(math.pow(l,2) - math.pow(smallestl,2))
 
-	if ac > (0.5 * coxaalphamax):
-		ac = abs(ac) - (0.5 * coxaalphamax)
-	else:
-		ac = (0.5 * coxaalphamax) - abs(ac)
+	#if ac > (0.5 * coxaalphamax):
+		#ac = abs(ac) - (0.5 * coxaalphamax)
+	#else:
+		#ac = (0.5 * coxaalphamax) - abs(ac)
 
 	#print (ac)
 	
@@ -72,7 +70,7 @@ def legIk(x = 0, y = 0, z = 0, values = None):
         
 	sfactor = 1024.00/300
 	
-	acs = (1024 - ((acn + 150) * sfactor))
+	acs = (1024 - ((ac + 150) * sfactor))
 	afs = (af + 150) * sfactor
 	ats = (150 - at) * sfactor
 	
