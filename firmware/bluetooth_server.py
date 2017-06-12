@@ -9,6 +9,7 @@ class BluetoothServer:
     def __init__(self, queue, port=1):
         self.workers = []
         self.port = port
+        self.queue = queue
         self.socket = socket.socket(socket.AF_BLUETOOTH, socket.SOCK_STREAM, socket.BTPROTO_RFCOMM)
 
     def run(self):
@@ -25,11 +26,12 @@ class BluetoothServer:
 
     def worker(self, client, address):
         size = 1024
-        print("Clinet %s connected" % address)
+        print("Client %s connected" % address)
         while True:
             try:
                 data = client.recv(size)
                 if data:
+                    split = data.split(':')
                     print(data)
                 else:
                     raise "Client disconnected"
