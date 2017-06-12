@@ -17,16 +17,35 @@ class leg (threading.Thread):
         self.currentTask = "idle"
         self.stopSignal = False
 
+        self.x = 130.19
+        self.y = 0
+        self.z = 74.90
+
     def run(self):
         #self.walk(130.19,0,74.90)
         while self.stopSignal == False:
             self.checkNewTask()
 	
-    def queueMove(self, hipRot = -1, kneeRot = -1, footRot = -1, speed = -1):
-        self.moveQueue.put([self, hipRot, kneeRot, footRot, speed])
+    def changePos(self,addX = None, addY = None, addZ = None, setX = None, setY = None, setZ = None):
+        if addX != None:
+            self.x += addX
+        if addY != None:
+            self.y += addY
+        if addZ != None:
+            self.z += addZ
+
+        if setX != None:
+            self.x = setX
+        if setY != None:
+            self.y = setY
+        if setZ != None:
+            self.z = setZ
+            
+        #return [self.x, self.y, self.z]
+        self.move(ik.legIk(values = [self.x, self.y, self.z]))
 
     #values expects an array with hipRot, kneeRot, footRot
-    def move(self, values):
+    def move(self, values, speed = -1):
         legId = self.id
 
         acsOffset = 0
@@ -37,8 +56,8 @@ class leg (threading.Thread):
         elif legId == 3 or legId == 6:
             acsOffset = 153
         values[0] += acsOffset
-        
-        self.queueMove(hipRot = int(values[0]), kneeRot = int(values[1]), footRot = int(values[2]))
+       
+        self.moveQueue.put([self, int(values[0]), int(values[1]), int(values[2]), int(speed)])
 
     # check if a new task is available
     def checkNewTask(self):
@@ -74,130 +93,87 @@ class leg (threading.Thread):
 
         
     def walk(self,x = 130.19, y = 0, z = 74.90):
-        timeout = 0.2
+        timeout = 0.3
         #                    x    y    z
-        #initial feet pos 130.19, 0, 74.90
-        startPos = [x,y,z]
-        currentPos = startPos
-        
-        self.move(ik.legIk(startPos[0], startPos[1] , startPos[2]))
-        
-        sleep(0.7)
-        
-        if self.id % 2 == 0:
-            y += 28
-            self.move(ik.legIk(x, y, z))
+        #initial feet pos 130.19, 0, 74.90)
+        self.changePos(setX = x, setY = y, setZ = z)
+        sleep(1)
 
+        # even legs
+        if self.id % 2 == 0:
+            
+            self.changePos(addY = 27)
             sleep(timeout)
 
-            self.move(ik.legIk(x, y, z))
-
             while self.checkNewTask() == False:
-                y -= 56
-                self.move(ik.legIk(x, y, z))
-
+                
+                self.changePos(addY = -54)
                 sleep(timeout)
                  
-                y += 56
-                z += 40
-                self.move(ik.legIk(x, y, z))
-                    
+                self.changePos(addY = 54, addZ = 40)
                 sleep(timeout)
 
-                z -= 40
-                self.move(ik.legIk(x, y, z))
+                self.changePos(addZ = -40)
                 sleep(timeout)
 
-        #input = raw_input("2")
-                   
+        # uneven legs                   
         elif self.id % 2 != 0:
             
-            y -= 28
-            self.move(ik.legIk(x, y, z))
-
+            self.changePos(addY = -27)
             sleep(timeout)
-
-            self.move(ik.legIk(x, y, z))
             
             while self.checkNewTask() == False:
-                y += 56
-                z += 40
-                self.move(ik.legIk(x, y, z))
-    
+                
+                self.changePos(addY = 54, addZ = 40)
                 sleep(timeout)
     
-                z -= 40
-                self.move(ik.legIk(x, y, z))
-                    
+                self.changePos(addZ = -40)
                 sleep(timeout)
 
-                y -= 56
-                self.move(ik.legIk(x, y, z))
-
+                self.changePos(addY = -54)
                 sleep(timeout)
 
 
     def walkBackwards(self,x = 130.19, y = 0, z = 74.90):
-        timeout = 0.2
+        timeout = 0.3
         #                    x    y    z
-        #initial feet pos 130.19, 0, 74.90
-        startPos = [x,y,z]
-        currentPos = startPos
+        #initial feet pos 130.19, 0, 74.90):
+        self.changePos(setX = x, setY = y, setZ = z)
         
-        self.move(ik.legIk(startPos[0], startPos[1] , startPos[2]))
-        
-        sleep(0.7)
-        
-        if self.id % 2 == 0:
-            y -= 28
-            self.move(ik.legIk(x, y, z))
+        sleep(1)
 
+        # even legs
+        if self.id % 2 == 0:
+            
+            self.changePos(addY = -27)
             sleep(timeout)
 
-            self.move(ik.legIk(x, y, z))
-
             while self.checkNewTask() == False:
-                y += 56
-                self.move(ik.legIk(x, y, z))
-
+                
+                self.changePos(addY = 54)
                 sleep(timeout)
                  
-                y -= 56
-                z += 40
-                self.move(ik.legIk(x, y, z))
-                    
+                self.changePos(addY = -54, addZ = 40)
                 sleep(timeout)
 
-                z -= 40
-                self.move(ik.legIk(x, y, z))
+                self.changePos(addZ = -40)
                 sleep(timeout)
 
-        #input = raw_input("2")
-                   
+        # uneven legs                   
         elif self.id % 2 != 0:
             
-            y += 28
-            self.move(ik.legIk(x, y, z))
-
+            self.changePos(addY = 27)
             sleep(timeout)
-
-            self.move(ik.legIk(x, y, z))
             
             while self.checkNewTask() == False:
-                y -= 56
-                z += 40
-                self.move(ik.legIk(x, y, z))
-    
+                
+                self.changePos(addY = -54, addZ = 40)
                 sleep(timeout)
-    
-                z -= 40
-                self.move(ik.legIk(x, y, z))
-                    
+                
+                self.changePos(addZ = -40)
                 sleep(timeout)
 
-                y += 56
-                self.move(ik.legIk(x, y, z))
-
+                self.changePos(addY = 54)
                 sleep(timeout)
 
                 
@@ -219,6 +195,8 @@ class leg (threading.Thread):
             self.foot.move(rotation)
         else:
             self.foot.move(rotation, speed)
+
+        
            
 
 

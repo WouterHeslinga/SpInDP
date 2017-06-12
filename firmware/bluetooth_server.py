@@ -27,6 +27,7 @@ class BluetoothServer:
     def worker(self, client, address):
         size = 1024
         print("Client %s connected" % address)
+
         while True:
             try:
                 data = client.recv(size)

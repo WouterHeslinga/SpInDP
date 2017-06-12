@@ -210,7 +210,7 @@ class queueHandlerThread(threading.Thread):
                     
                 values = self.queue.get()
 
-                #print(values)
+                print(values)
                 
                 leg = values[0]
                 speed = values[4]
