@@ -71,16 +71,18 @@ def main():
             elif input == "f":
                 for leg in legs:
                     leg.taskList.put("f")
+                    time.sleep(0.13)
                     
             
             elif input == "b":
                 for leg in legs:
                     leg.taskList.put("b")
+                    time.sleep(0.13)
 
             elif input == "torque":
                 input = raw_input("torque: ")
                 for x in servos:
-                    x.setTorqueLimit(int(input))
+                    x.setTorque(int(input))
             elif input == "c_d":
                 if c_debugApp.isAlive() == False:
                     c_debugApp.start()
@@ -215,8 +217,6 @@ class queueHandlerThread(threading.Thread):
                 values = self.queue.get()
                 
                 leg = values[0]
-                if leg.id == 2:
-                    print(values)
                 speed = values[4]
                 if values[1] != -1:
                     leg.moveHip(int(values[1]),speed)

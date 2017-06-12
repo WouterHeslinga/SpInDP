@@ -92,10 +92,10 @@ class leg (threading.Thread):
             
 
         
-    def walk(self,x = 200.19, y = 0, z = 70.90):
-        timeout = 1
-        stepWidth = 54
-        stepHeight = 40
+    def walk(self,x = 120.19, y = 0, z = 100.90):
+        timeout = 0.1
+        stepWidth = 66
+        stepHeight = 30
         #                    x    y    z
         #initial feet pos 130.19, 0, 74.90)
         self.changePos(setX = x, setY = y, setZ = z)
@@ -109,7 +109,10 @@ class leg (threading.Thread):
 
             while self.checkNewTask() == False:
                 
-                self.changePos(addY = -stepWidth)
+                self.changePos(addY = -stepWidth / 2)
+                sleep(timeout)
+                
+                self.changePos(addY = -stepWidth / 2)
                 sleep(timeout)
                  
                 self.changePos(addY = stepWidth, addZ = stepHeight)
@@ -132,14 +135,17 @@ class leg (threading.Thread):
                 self.changePos(addZ = -stepHeight)
                 sleep(timeout)
 
-                self.changePos(addY = -stepWidth)
+                self.changePos(addY = -stepWidth / 2)
+                sleep(timeout)
+
+                self.changePos(addY = -stepWidth / 2)
                 sleep(timeout)
 
 
-    def walkBackwards(self,x = 170.19, y = 0, z = 100.90):
-        timeout = 1
-        stepWidth = 54
-        stepHeight = 40
+    def walkBackwards(self,x = 120.19, y = 0, z = 100.90):
+        timeout = 0.1
+        stepWidth = 66
+        stepHeight = 30
         #                    x    y    z
         #initial feet pos 130.19, 0, 74.90):
         self.changePos(setX = x, setY = y, setZ = z)
@@ -154,7 +160,10 @@ class leg (threading.Thread):
 
             while self.checkNewTask() == False:
                 
-                self.changePos(addY = stepWidth)
+                self.changePos(addY = stepWidth / 2)
+                sleep(timeout)
+
+                self.changePos(addY = stepWidth / 2)
                 sleep(timeout)
                  
                 self.changePos(addY = -stepWidth, addZ = stepHeight)
@@ -177,7 +186,10 @@ class leg (threading.Thread):
                 self.changePos(addZ = -stepHeight)
                 sleep(timeout)
 
-                self.changePos(addY = stepWidth)
+                self.changePos(addY = stepWidth / 2)
+                sleep(timeout)
+
+                self.changePos(addY = stepWidth / 2)
                 sleep(timeout)
 
                 
