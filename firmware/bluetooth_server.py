@@ -33,7 +33,8 @@ class BluetoothServer:
                 data = client.recv(size)
                 if data:
                     split = data.split(':')
-                    print(data)
+                    self.queue.put(split)
+                    print("Server recieved: %s" % split.joint(', '))
                 else:
                     raise "Client disconnected"
             except:

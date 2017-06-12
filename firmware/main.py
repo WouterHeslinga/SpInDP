@@ -27,7 +27,7 @@ def motion_controller_worker(queue):
     """Worker for the leg controller"""
     print("Starting leg controller worker")
     motion = MotionController(queue)
-    motion.update()
+    motion.run()
 
 def bluetooth_server_worker(queue):
     """Worker for the bluetooth server"""
