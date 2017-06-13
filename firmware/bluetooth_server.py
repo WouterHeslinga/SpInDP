@@ -38,7 +38,8 @@ class BluetoothServer:
                 else:
                     print("Error recieving data")
                     raise "Client disconnected"
-            except:
+            except Exception as ex:
                 client.close()
                 print("Client %s disconnected" % address[0])
+                print(ex)
                 return False
