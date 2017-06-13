@@ -32,6 +32,7 @@ class BluetoothServer:
         while True:
             try:
                 data = data + client.recv(size)
+                print(data)
                 while True:
                     end = data.find('\n')
                     if end == -1:
