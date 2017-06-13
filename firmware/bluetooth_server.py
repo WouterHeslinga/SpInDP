@@ -35,7 +35,7 @@ class BluetoothServer:
                 end = data.find('\n')
                 if end != -1:
                     command = data[:end]
-                    data = data[end:]
+                    data = data[end+1:]
                     split = data.split(":")
                     self.queue.put(split)
                     print("Server recieved: %s" % ", ".join(split))
