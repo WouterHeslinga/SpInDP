@@ -32,17 +32,16 @@ class BluetoothServer:
         while True:
             try:
                 data = data + client.recv(size)
-                print(data)
                 while True:
                     end = data.find('\n')
                     if end == -1:
                         break
                     
                     command = data[:end]
-                    data = data[end+1:]
-                    split = data.split(":")
+                    split = command.split(":")
                     self.queue.put(split)
                     print("Server recieved: %s" % ", ".join(split))
+                    data = data[end+1:]
 
             except Exception as ex:
                 client.close()
