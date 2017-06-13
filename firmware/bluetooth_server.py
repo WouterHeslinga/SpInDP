@@ -28,16 +28,18 @@ class BluetoothServer:
         size = 1024
         print("Client %s connected" % address[0])
 
+        data = ""
         while True:
             try:
-                data = client.recv(size)
-                if data:
-                    split = data.split(':')
+                data = data + client.recv(size)
+                end = data.find('\n')
+                if end != -1:
+                    command = data[:end]
+                    data = data[end:]
+                    split = data.split(":")
                     self.queue.put(split)
                     print("Server recieved: %s" % ", ".join(split))
-                else:
-                    print("Error recieving data")
-                    raise "Client disconnected"
+
             except Exception as ex:
                 client.close()
                 print("Client %s disconnected" % address[0])
