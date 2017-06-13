@@ -22,7 +22,6 @@ class leg (threading.Thread):
         self.z = 74.90
 
     def run(self):
-        #self.walk(130.19,0,74.90)
         while self.stopSignal == False:
             self.checkNewTask()
 	
@@ -79,27 +78,40 @@ class leg (threading.Thread):
 
     # switch to a new task
     def switchTask(self):
+        #self.resetPos(x = 130.19, y = 0, z = 100.90)
+        self.changePos(setX = 130.19, setY = 0, setZ = 100.90)
         if str(self.currentTask) == "f":
             while self.checkNewTask() == False:
                 self.walk()
         elif str(self.currentTask) == "b":
             while self.checkNewTask() == False:
                 self.walkBackwards()
+        elif str(self.currentTask) == "l":
+            while self.checkNewTask() == False:
+                self.walkLeft()
+        elif str(self.currentTask) == "turn":
+            while self.checkNewTask() == False:
+                self.walkTurn()
+        elif str(self.currentTask) == "place":
+            while self.checkNewTask() == False:
+                self.walkTurnInPlace()
         elif self.currentTask == "idle":
+                        #                    x    y    z
+            #initial feet pos 130.19, 0, 74.90):
+            self.changePos(setX = 130.19, setY = 0, setZ = 74.90)
             while self.checkNewTask() == False:
                 sleep(0.2)
                 
             
 
         
-    def walk(self,x = 120.19, y = 0, z = 100.90):
+    def walk(self,x = 130.19, y = 0, z = 100.90):
         timeout = 0.1
-        stepWidth = 66
+        stepWidth = -55
         stepHeight = 30
         #                    x    y    z
         #initial feet pos 130.19, 0, 74.90)
-        self.changePos(setX = x, setY = y, setZ = z)
-        sleep(1)
+        #self.changePos(setX = x, setY = y, setZ = z)
 
         # even legs
         if self.id % 2 == 0:
@@ -110,8 +122,7 @@ class leg (threading.Thread):
             while self.checkNewTask() == False:
                 
                 self.changePos(addY = -stepWidth / 2)
-                sleep(timeout)
-                
+                sleep(0.1)
                 self.changePos(addY = -stepWidth / 2)
                 sleep(timeout)
                  
@@ -136,16 +147,64 @@ class leg (threading.Thread):
                 sleep(timeout)
 
                 self.changePos(addY = -stepWidth / 2)
-                sleep(timeout)
+                sleep(0.1)
 
                 self.changePos(addY = -stepWidth / 2)
                 sleep(timeout)
 
 
-    def walkBackwards(self,x = 120.19, y = 0, z = 100.90):
+    def walkBackwards(self,x = 130.19, y = 0, z = 100.90):
         timeout = 0.1
-        stepWidth = 66
+        stepWidth = -55
         stepHeight = 30
+        #                    x    y    z
+        #initial feet pos 130.19, 0, 74.90):
+        #self.changePos(setX = x, setY = y, setZ = z)
+
+        # even legs
+        if self.id % 2 == 0:
+            
+            self.changePos(addY = -stepWidth / 2)
+            sleep(timeout)
+
+            while self.checkNewTask() == False:
+                
+                self.changePos(addY = stepWidth / 2)
+                sleep(timeout)
+
+                self.changePos(addY = stepWidth / 2)
+                sleep(timeout)
+                 
+                self.changePos(addY = -stepWidth / 2, addZ = stepHeight)
+                sleep(timeout)
+
+                self.changePos(addY = -stepWidth / 2, addZ = -stepHeight)
+                sleep(timeout)
+
+        # uneven legs                   
+        elif self.id % 2 != 0:
+            
+            self.changePos(addY = stepWidth / 2)
+            sleep(timeout)
+            
+            while self.checkNewTask() == False:
+                
+                self.changePos(addY = -stepWidth / 2, addZ = stepHeight)
+                sleep(timeout)
+                
+                self.changePos(addY = -stepWidth / 2, addZ = -stepHeight)
+                sleep(timeout)
+
+                self.changePos(addY = stepWidth / 2)
+                sleep(timeout)
+
+                self.changePos(addY = stepWidth / 2)
+                sleep(timeout)
+
+    def walkLeft(self,x = 160.19, y = 0, z = 100.90):
+        timeout = 0.1
+        stepWidth = 60
+        stepHeight = 40
         #                    x    y    z
         #initial feet pos 130.19, 0, 74.90):
         self.changePos(setX = x, setY = y, setZ = z)
@@ -154,6 +213,180 @@ class leg (threading.Thread):
 
         # even legs
         if self.id % 2 == 0:
+            if self.id == 4 or self.id == 6:
+                self.changePos(addX = -stepWidth / 2)
+            else:
+                self.changePos(addX = stepWidth / 2)
+            sleep(timeout)
+
+            while self.checkNewTask() == False:
+                if self.id == 4 or self.id == 6:
+                    #ground
+                    self.changePos(addX = stepWidth / 2)
+                    sleep(timeout)
+                    self.changePos(addX = stepWidth / 2)
+                    sleep(timeout)
+                    
+                    #air 
+                    self.changePos(addX = -stepWidth / 2, addZ = stepHeight)
+                    sleep(timeout)
+                    self.changePos(addX = -stepWidth / 2, addZ = -stepHeight)
+                    sleep(timeout)
+
+
+                else:
+                    #ground
+                    self.changePos(addX = -stepWidth / 2)
+                    sleep(timeout)
+                    self.changePos(addX = -stepWidth / 2)
+                    sleep(timeout)
+
+                    #air
+                    self.changePos(addX = stepWidth / 2, addZ = stepHeight)
+                    sleep(timeout)
+                    self.changePos(addX = stepWidth / 2, addZ = -stepHeight)
+                    sleep(timeout)
+                    
+
+        # uneven legs                   
+        elif self.id % 2 != 0:
+            if self.id == 5:
+                self.changePos(addX = stepWidth / 2)
+            else:
+                self.changePos(addX = -stepWidth / 2)
+            sleep(timeout)
+            
+            while self.checkNewTask() == False:
+                if self.id == 5:
+
+                    #air
+                    self.changePos(addX = -stepWidth / 2, addZ = stepHeight)
+                    sleep(timeout)
+                    self.changePos(addX = -stepWidth / 2, addZ = -stepHeight)
+                    sleep(timeout)
+                    
+                    #ground
+                    self.changePos(addX = stepWidth / 2)
+                    sleep(timeout)
+                    self.changePos(addX = stepWidth / 2)
+                    sleep(timeout)
+
+
+                else:
+                    #air
+                    self.changePos(addX = stepWidth / 2, addZ = stepHeight)
+                    sleep(timeout)
+                    self.changePos(addX = stepWidth / 2, addZ = -stepHeight)
+                    sleep(timeout)
+
+                    #ground
+                    self.changePos(addX = -stepWidth / 2)
+                    sleep(timeout)
+                    self.changePos(addX = -stepWidth / 2)
+                    sleep(timeout)
+
+                    
+                
+
+    def walkTurnInPlace(self,x = 120.19, y = 0, z = 100.90):
+        timeout = 0.1
+        stepWidth = 66
+        stepHeight = 30
+        #                    x    y    z
+        #initial feet pos 130.19, 0, 74.90)
+        #reset
+        self.changePos(setX = x, setY = y, setZ = z)
+        sleep(1)
+
+        #step 1: leg 3 and 4
+
+        if self.id == 3:
+            self.changePos(addY = -stepWidth/2, addZ = stepHeight)
+        elif self.id == 4:
+            self.changePos(addY = stepWidth/2, addZ = stepHeight)
+        
+        sleep(timeout)
+
+        if self.id == 3 or self.id == 4:
+            self.changePos(addZ = -stepHeight)
+            
+        sleep(timeout)
+
+        #step 2: leg 1 and 6
+        
+        if self.id == 1:
+            self.changePos(addY = -stepWidth/2, addZ = stepHeight)
+        elif self.id == 6:
+            self.changePos(addY = stepWidth/2, addZ = stepHeight)
+
+        sleep(timeout)
+        
+        if self.id == 1 or self.id == 6:
+            self.changePos(addZ = -stepHeight)
+
+        sleep(timeout)
+
+        #initialize loop
+
+        while self.checkNewTask() == False:
+            #step 3:leg 2 and 5 up
+            if self.id == 2 or self.id == 5:
+                self.changePos(addZ = stepHeight)
+            sleep(timeout)
+            
+            #step 4: move legs 1,3,4,6 for the turn
+            if self.id == 1 or self.id == 3:
+                self.changePos(addY = stepWidth)
+            elif self.id == 4 or self.id == 6:
+                self.changePos(addY = -stepWidth)
+            sleep(timeout)
+
+            #step 5: leg 2 and 5 down again
+
+            if self.id == 2 or self.id == 5:
+                self.changePos(addZ = -stepHeight)
+            sleep(timeout)
+
+            #step 6: leg 3 and 4 on pos
+
+            if self.id == 3:
+                self.changePos(addY = -stepWidth, addZ = stepHeight)
+            elif self.id == 4:
+                self.changePos(addY = stepWidth, addZ = stepHeight)
+        
+            sleep(timeout)
+
+            if self.id == 3 or self.id == 4:
+                self.changePos(addZ = -stepHeight)
+
+            #step 7: leg 1 and 6 on pos
+
+            if self.id == 1:
+                self.changePos(addY = -stepWidth, addZ = stepHeight)
+            elif self.id == 6:
+                self.changePos(addY = stepWidth, addZ = stepHeight)
+
+            sleep(timeout)
+        
+            if self.id == 1 or self.id == 6:
+                self.changePos(addZ = -stepHeight)
+
+            sleep(timeout)
+
+            #step 3 again
+            
+    def walkTurn(self,x = 120.19, y = 0, z = 100.90):
+        timeout = 0.1
+        stepWidth = -30
+        stepHeight = 30
+        #                    x    y    z
+        #initial feet pos 130.19, 0, 74.90):
+        self.changePos(setX = x, setY = y, setZ = z)
+        
+        sleep(1)
+
+        # even legs
+        if self.id == 2:
             
             self.changePos(addY = -stepWidth / 2)
             sleep(timeout)
@@ -172,10 +405,31 @@ class leg (threading.Thread):
                 self.changePos(addZ = -stepHeight)
                 sleep(timeout)
 
-        # uneven legs                   
-        elif self.id % 2 != 0:
+        elif self.id == 4 or self.id == 6:
             
             self.changePos(addY = stepWidth / 2)
+            sleep(timeout)
+
+            while self.checkNewTask() == False:
+                
+                self.changePos(addY = -stepWidth / 2)
+                sleep(timeout)
+
+                self.changePos(addY = -stepWidth / 2)
+                sleep(timeout)
+                 
+                self.changePos(addY = stepWidth, addZ = stepHeight)
+                sleep(timeout)
+
+                self.changePos(addZ = -stepHeight)
+                sleep(timeout)
+
+
+
+
+        elif self.id == 1 or self.id == 3:
+            
+            self.changePos(addY = -stepWidth / 2)
             sleep(timeout)
             
             while self.checkNewTask() == False:
@@ -192,8 +446,35 @@ class leg (threading.Thread):
                 self.changePos(addY = stepWidth / 2)
                 sleep(timeout)
 
+        elif self.id == 5:
+            
+            self.changePos(addY = stepWidth / 2)
+            sleep(timeout)
+            
+            while self.checkNewTask() == False:
                 
+                self.changePos(addY = stepWidth, addZ = stepHeight)
+                sleep(timeout)
+                
+                self.changePos(addZ = -stepHeight)
+                sleep(timeout)
 
+                self.changePos(addY = -stepWidth / 2)
+                sleep(timeout)
+
+                self.changePos(addY = -stepWidth / 2)
+                sleep(timeout)
+
+    """def resetPos(self,x = 120.19, y = 0, z = 100.90):
+        totalTimeout = 6
+        timeout = int(totalTimeout - (self.id * totalTimeout))
+        sleep(timeout)
+        self.changePos(setX = x, setY = y, setZ = z -30)
+        sleep(0.2)
+        self.changePos(setX = x, setY = y, setZ = z + 30)
+        remainingTimeout = int(totalTimeout - timeout)
+        sleep(remainingTimeout)"""
+        
     def moveHip(self, rotation, speed = -1):
         if speed == -1:
             self.hip.move(rotation)

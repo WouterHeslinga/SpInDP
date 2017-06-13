@@ -24,7 +24,7 @@ class serverThread (threading.Thread):
 		if self.name == "debugApp":
                         self.startDebugAppServer()
                 elif self.name == "controller":
-                        self.startControllerServer()
+                        self.startControllerServerDebug()
 	def stop(self):
                 print "Trying to close socket...",
 		try:
@@ -98,6 +98,53 @@ class serverThread (threading.Thread):
 				self.socket.close()
 				break
 
+	def startControllerServerDebug(self):
+                #bind a server port to listen for incoming connections
+                self.bind_and_listen('00:1A:7D:DA:71:12', 1)
+
+		while self.stopSign == False:
+			try:
+                                self.s_print("Waiting for a connection...")
+				client, address = self.socket.accept()
+				self.s_print("Connection accepted")
+
+				while 1:
+				    data = str(client.recv(1024))
+
+                                    for leg in self.legs:
+                                        leg.taskList.put(data)
+                                    """if data == "f":
+                                        for leg in self.legs:
+                                            leg.taskList.put("f")
+                                            
+                                    
+                                    elif data == "b":
+                                        for leg in self.legs:
+                                            leg.taskList.put("b")
+                                            
+				    elif data == "idle":
+                                        for leg in self.legs:
+                                            leg.taskList.put("idle")"""
+                                            
+				    print("data:" + data)
+
+			except KeyboardInterrupt:
+				self.s_print("Interrupted by user")
+				if client != None:
+                                        client.close()
+				self.socket.close()
+			except Exception as ex:
+                                self.s_print(str(str(ex)[:7]))
+                                if str(str(ex)[:7]) in "Timeout":
+                                        self.s_print("Exception: " + str(ex))
+                                        pass
+
+				self.s_print("Closing socket with exception" + str(ex))
+				if client != None:
+                                        client.close()
+				self.socket.close()
+				break
+
         def startControllerServer(self):
             #bind a server port to listen for incoming connections
             #self.bind_and_listen('00:1A:7D:DA:71:12', 1)
@@ -134,7 +181,7 @@ class serverThread (threading.Thread):
                                 try:                                                                
                                     print "trying to receive..."
                                     data += self.socket.recv(1024)
-
+                                    print(str(data))  
                                     #print(data)
                                     #if data[0] == "0":                                           
                                     #        print("Values")
