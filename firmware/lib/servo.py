@@ -17,7 +17,7 @@ class Servo():
         self.joint = joint
         self.temperature = 0
         self.angle = 0
-        self.defaultSpeed = 150
+        self.defaultSpeed = 700
     
     def getTemperature(self):
         self.temperature = ax.readTemperature(self.id)
@@ -26,6 +26,9 @@ class Servo():
     def getAngle(self):
         self.angle = ax.readPosition(self.id)
         return self.angle
+
+    def setTorque(self,value):
+        ax.setTorqueLimit(self.id,value)
     
     def move(self, rotation, speed = -1):
         if speed == -1:
@@ -92,7 +95,7 @@ def readServoMappings():
         try:			
             line = f.readline()
             print "Pinging: " + str(x) + "... ",
-            sleep(.05)
+            sleep(.01)
             ax.ping(x)
 
             print "servo found... ",

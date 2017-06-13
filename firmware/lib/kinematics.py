@@ -3,7 +3,11 @@
 from time import sleep
 import math
 
-def legIk(x, y, z):
+def legIk(x = 0, y = 0, z = 0, values = None):
+        if values != None:
+                x = values[0]
+                y = values[1]
+                z = values[2]
         #legIk(130.19, 0, 74.90)
         #servo omhoog is 512+, servo naar rechts is -
         #feetpos

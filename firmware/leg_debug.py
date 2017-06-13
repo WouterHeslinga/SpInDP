@@ -58,26 +58,31 @@ def main():
     while True:
         try:
             #getInput = "f"
-            getInput = raw_input("\ndirections (f/b/l/r) (idle/test) commands (c_c/c_d/debug/reread/remap/quit): ")
+            getInput = raw_input("\ndirections (f/b/l/r) d (rest/test) commands (c_c/c_d/debug/reread/remap/quit): ")
             if input != getInput:
                 input = getInput
     
             if input == "test":
                 setLegs(450,700,512)
+            elif input == "rest":
+                for leg in legs:
+                    leg.taskList.put("idle")
                     
             elif input == "f":
                 for leg in legs:
                     leg.taskList.put("f")
+                    time.sleep(0.13)
                     
             
             elif input == "b":
                 for leg in legs:
                     leg.taskList.put("b")
-                    
-            elif input == "idle":
-                for leg in legs:
-                    leg.taskList.put("idle")
+                    time.sleep(0.13)
 
+            elif input == "torque":
+                input = raw_input("torque: ")
+                for x in servos:
+                    x.setTorque(int(input))
             elif input == "c_d":
                 if c_debugApp.isAlive() == False:
                     c_debugApp.start()
@@ -210,8 +215,6 @@ class queueHandlerThread(threading.Thread):
                         time.sleep(1)
                     
                 values = self.queue.get()
-
-                #print(values)
                 
                 leg = values[0]
                 speed = values[4]
