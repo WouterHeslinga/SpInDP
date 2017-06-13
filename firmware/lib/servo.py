@@ -17,7 +17,7 @@ class Servo():
         self.joint = joint
         self.temperature = 0
         self.angle = 0
-        self.defaultSpeed = 700
+        self.defaultSpeed = 600
     
     def getTemperature(self):
         self.temperature = ax.readTemperature(self.id)

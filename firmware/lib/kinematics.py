@@ -16,7 +16,7 @@ def legIk(x = 0, y = 0, z = 0, values = None):
         #posZ = 74.90
         lc = 37
         lf = 67.19
-        lt = 137.51
+        lt = 149.42
         lb = 130.12
         #lb = math.sqrt(math.pow(x,2) + math.pow(y,2) + math.pow(z,2))
 
