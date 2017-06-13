@@ -32,8 +32,11 @@ class BluetoothServer:
         while True:
             try:
                 data = data + client.recv(size)
-                end = data.find('\n')
-                if end != -1:
+                while True:
+                    end = data.find('\n')
+                    if end == -1:
+                        break
+                    
                     command = data[:end]
                     data = data[end+1:]
                     split = data.split(":")
