@@ -37,7 +37,6 @@ def main():
     #fills legs[] with threads based on servos[]
     legs = mapLegs()
        
-    
     activeThreads = []
 
     # Create serverThreads
@@ -57,14 +56,12 @@ def main():
 
     while True:
         try:
-            #getInput = "f"
-            getInput = raw_input("\ndirections (f/b/l/r) d (rest/test) commands (c_c/c_d/debug/reread/remap/quit): ")
+            #get User Input
+            getInput = raw_input("\ndirections (uX <- X = number/rest) commands (c_c/c_d/debug/reread/remap/quit): ")
             if input != getInput:
                 input = getInput
     
-            if input == "test":
-                setLegs(450,700,512)
-            elif input == "rest":
+            if input == "rest":
                 for leg in legs:
                     leg.taskList.put("idle")
                     
@@ -88,18 +85,13 @@ def main():
                     leg.taskList.put("place")
                     
 
-            elif input == "torque":
-                input = raw_input("torque: ")
-                for x in servos:
-                    x.setTorque(int(input))
             elif input == "c_d":
                 if c_debugApp.isAlive() == False:
                     c_debugApp.start()
                     activeThreads.append(c_debugApp)
                 else:
                     print("Already started")
-                    
-
+        
             elif input == "c_c":
                 if c_controller.isAlive() == False:
                     c_controller.start()
@@ -130,6 +122,7 @@ def main():
             elif input == "reread":
                 servos = servo.readServoMappings()
                 legs = mapLegs()
+                
             elif input == "remap":
                 servo.mapServos()
                 servo.readServoMappings()
@@ -146,16 +139,7 @@ def main():
         
         time.sleep(0.01)
 
-    
-    """if debugWindow.isAlive() == True:
-        debugWindow.stop()
-
-    if debugIkWindow.isAlive() == True:
-        debugIkWindow.stop()
-        
-    for serverThread in activeServerThreads:
-            serverThread.stop()"""
-
+    #call stop function on alive threads
     for thread in activeThreads:
         if thread.isAlive():
             thread.stop()
@@ -167,37 +151,7 @@ def main():
             thread.join()
             print("done " + str(thread))
 
-def defaultPos():
-    global legs
-
-    for leg in legs:
-        leg.move(ik.legIk(150,50,70))
-
-def setAll(rotation):
-    global servos
-    for servo in servos:
-        try:
-            ax.ping(servo.id)
-            servo.move(rotation)
-        except:
-            print("jammer")
-
-def setLeg(legID,hip,knee,foot):
-    global legs
-    
-    leg = legs[legID - 1] 
-    leg.moveFoot(foot)
-    leg.moveKnee(knee)
-    leg.moveHip(hip)
-
-def setLegs(hip,knee,foot):
-    global legs
-
-    for leg in legs:
-        leg.moveFoot(foot)
-        leg.moveKnee(knee)
-        leg.moveHip(hip)
-
+#this processes all items in the specified queue and makes sure that there is some wait time between every move signal
 class queueHandlerThread(threading.Thread):
     def __init__(self, id, queue):
         threading.Thread.__init__(self)
@@ -205,11 +159,13 @@ class queueHandlerThread(threading.Thread):
         self.queue = queue
         self.active = True
         self.stopSignal = False
+        
     def set_active(self, state):
         if state == True:
             self.active = True
         if state == False:
             self.active = False
+            
     def stop(self):
         self.active = False
         self.stopSignal = True
@@ -223,7 +179,8 @@ class queueHandlerThread(threading.Thread):
                         return
                     else:
                         time.sleep(1)
-                    
+                        
+                #get move values from the queue, values should contain legReference, hipRot, kneeRot, footRot, speedValue
                 values = self.queue.get()
                 
                 leg = values[0]
@@ -245,6 +202,8 @@ class queueHandlerThread(threading.Thread):
         print("stopping")
 
 
+#returns an array with leg objects, leg objects needs 3 servo references(hip,knee,foot)
+#this also starts each leg (thread)
 def mapLegs():
     global servos
     legs = []
