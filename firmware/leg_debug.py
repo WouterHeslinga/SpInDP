@@ -68,38 +68,15 @@ def main():
                 for leg in legs:
                     leg.taskList.put("idle")
                     
-            elif input == "f":
-                legs[0].taskList.put("f")
-                legs[3].taskList.put("f")
+            elif input[:1] == "u":
+                legs[0].taskList.put(input)
+                legs[3].taskList.put(input)
                 time.sleep(0.1)
-                legs[1].taskList.put("f")
-                legs[4].taskList.put("f")
+                legs[1].taskList.put(input)
+                legs[4].taskList.put(input)
                 time.sleep(0.1)
-                legs[2].taskList.put("f")
-                legs[5].taskList.put("f")
-                time.sleep(0.1)
-                    
-            
-            elif input == "b":
-                legs[0].taskList.put("b")
-                legs[3].taskList.put("b")
-                time.sleep(0.1)
-                legs[1].taskList.put("b")
-                legs[4].taskList.put("b")
-                time.sleep(0.1)
-                legs[2].taskList.put("b")
-                legs[5].taskList.put("b")
-                time.sleep(0.1)
-
-            elif input == "l":
-                legs[0].taskList.put("l")
-                legs[3].taskList.put("l")
-                time.sleep(0.1)
-                legs[1].taskList.put("l")
-                legs[4].taskList.put("l")
-                time.sleep(0.1)
-                legs[2].taskList.put("l")
-                legs[5].taskList.put("l")
+                legs[2].taskList.put(input)
+                legs[5].taskList.put(input)
                 time.sleep(0.1)
 
             elif input == "turn":
