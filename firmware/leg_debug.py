@@ -238,6 +238,7 @@ class queueHandlerThread(threading.Thread):
         self.stopSignal = True
         
     def run(self):
+        time.sleep(1)
         while self.stopSignal == False:                
             try:
                 while self.active == False:
@@ -252,12 +253,16 @@ class queueHandlerThread(threading.Thread):
                 speed = values[4]
                 if values[1] != -1:
                     leg.moveHip(int(values[1]),speed)
+                    time.sleep(0.001)
+                    
                 if values[2] != -1:
                     leg.moveKnee(int(values[2]),speed)
+                    time.sleep(0.001)
+                    
                 if values[3] != -1:
                     leg.moveFoot(int(values[3]),speed)
+                    time.sleep(0.001)
 
-                time.sleep(0.01)
             except Exception as ex:
                 print(str(ex))
         print("stopping")

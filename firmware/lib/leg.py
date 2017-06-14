@@ -55,6 +55,7 @@ class leg (threading.Thread):
         elif legId == 3 or legId == 6:
             acsOffset = 153
         values[0] += acsOffset
+        
        
         self.moveQueue.put([self, int(values[0]), int(values[1]), int(values[2]), int(speed)])
 
@@ -106,7 +107,7 @@ class leg (threading.Thread):
 
         
     def walk(self,x = 130.19, y = 0, z = 100.90):
-        timeout = 0.1
+        timeout = 0.2
         stepWidth = -55
         stepHeight = 30
         #                    x    y    z
@@ -154,7 +155,7 @@ class leg (threading.Thread):
 
 
     def walkBackwards(self,x = 130.19, y = 0, z = 100.90):
-        timeout = 0.1
+        timeout = 0.2
         stepWidth = -55
         stepHeight = 30
         #                    x    y    z
@@ -202,7 +203,7 @@ class leg (threading.Thread):
                 sleep(timeout)
 
     def walkLeft(self,x = 160.19, y = 0, z = 100.90):
-        timeout = 0.1
+        timeout = 0.2
         stepWidth = 60
         stepHeight = 40
         #                    x    y    z
@@ -289,7 +290,7 @@ class leg (threading.Thread):
                 
 
     def walkTurnInPlace(self,x = 120.19, y = 0, z = 100.90):
-        timeout = 0.1
+        timeout = 0.2
         stepWidth = 66
         stepHeight = 30
         #                    x    y    z
@@ -376,7 +377,7 @@ class leg (threading.Thread):
             #step 3 again
             
     def walkTurn(self,x = 120.19, y = 0, z = 100.90):
-        timeout = 0.1
+        timeout = 0.2
         stepWidth = -30
         stepHeight = 30
         #                    x    y    z
