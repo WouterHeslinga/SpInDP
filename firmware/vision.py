@@ -1,12 +1,21 @@
 import cv2
 import numpy as np
+from imutils.video.pivideostream import PiVideoStream
+import imutils
+from picamera.array import PiRGBArray
+from picamera import PiCamera
+from time import sleep
+
 
 class Vision:
     """Vision Class"""
-    def __init__(self, show_feed, queue):
+    def __init__(self, show_feed, queue, method, object_to_find):
+        self.vs = PiVideoStream().start()
+        sleep(.2)
         self.queue = queue
-        self.cap = cv2.VideoCapture(0)
         self.show_feed = show_feed
+        self.method = method
+        self.object_to_find = object_to_find
         self.status = {
             'symbols': {
                 'heart': False,
@@ -19,16 +28,31 @@ class Vision:
         self.shape_contours = self.get_reference_shapes_contours()
 
     def update(self):
-        """Process one frame"""
-        _, frame = self.cap.read()
-
+        """Process one frame"""        
+        frame = self.vs.read()
+        cv2.imshow('Test', frame)
         # Blur the image and get the hsv values
         blur = cv2.GaussianBlur(frame, (7,7), 0)
         hsv = cv2.cvtColor(blur, cv2.COLOR_BGR2HSV)
 
-        # Detect the shapes
-        self.process_shapes(hsv, frame.copy() if self.show_feed else None)
+        if self.method == "cards":
+            # Detect the shapes
 
+            if self.object_to_find == "heart":
+                self.process_shapes(hsv, frame.copy() if self.show_feed else None)
+            elif self.object_to_find == "spade":
+                self.process_shapes(hsv, frame.copy() if self.show_feed else None)
+            elif self.object_to_find == "club":
+                self.process_shapes(hsv, frame.copy() if self.show_feed else None)
+            elif self.object_to_find == "diamond":
+                self.process_shapes(hsv, frame.copy() if self.show_feed else None)
+                
+        elif self.method == "balloon":
+            # Detect the balloon
+            
+        elif self.method == "egg":
+            # Detect egg
+            
         self.queue.put(self.status)
         cv2.waitKey(10)
 
@@ -131,17 +155,22 @@ class Vision:
         result = None
         if color == 'red':
             result = cv2.inRange(hsv, (0, 180, 80), (255, 240, 255))
-            
-            # HSV colors hue is in 360 deg, so we need values in the negative. Use a seccond range and bitwise those.
-            # result = cv2.bitwise_or(result, cv2.inRange(hsv, (158, 137, 60), (182, 255, 255)))
+        elif color == 'whiteegg':
+            result = cv2.inRange(hsv, (0, 0, 150), (255, 75, 255))
+        elif color == 'brownegg':
+            result = cv2.inRange(hsv, (5, 60, 25), (20, 255, 255))
+        elif color == 'redballoon':
+            result = cv2.inRange(hsv, (0, 159, 114), (204, 245, 255))
+        elif color == 'blue':
+            result = cv2.inRange(hsv, (94, 86, 45), (154, 220, 222))
         elif color == 'black':
             result = cv2.inRange(hsv, (0, 0, 0), (179, 255, 100))
         else:
             raise ValueError('Fool!!, only black and red!')
         return result
-
+    
     def release(self):
-        self.cap.release()
+        self.vs.stop()
         cv2.destroyAllWindows()
 
 # If executed instead of import show a little demo

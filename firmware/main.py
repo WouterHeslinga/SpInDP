@@ -9,9 +9,9 @@ from bluetooth_server import BluetoothServer
 def vision_worker(queue):
     """Worker for the vision"""
     print("Starting vision worker")
-    #vision = Vision(True, queue)
-    #while True:
-    #    vision.update()
+    vision = Vision(True, queue)
+    while True:
+        vision.update()
     return
 
 
