@@ -63,7 +63,7 @@ if __name__ == '__main__':
             if 'temps' in commands:
                 print(commands['temps'])
             if 'objectcoords' in commands:
-                print(commands['objectcoords'])
+                queue_motion.put({'objectcoords': commands['objectcoords']})
                 
 
     # Join the workers
