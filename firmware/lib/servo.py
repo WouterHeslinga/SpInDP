@@ -17,7 +17,7 @@ class Servo():
         self.joint = joint
         self.temperature = 0
         self.angle = 0
-        self.defaultSpeed = 500
+        self.defaultSpeed = 700
     
     def getTemperature(self):
         self.temperature = ax.readTemperature(self.id)
@@ -31,6 +31,28 @@ class Servo():
         ax.setTorqueLimit(self.id,value)
     
     def move(self, rotation, speed = -1):
+        #clamp values
+        if self.joint == "hip":
+            if rotation < 340:
+                rotation = 340
+
+            elif rotation > 684:
+                rotation = 684
+        
+        elif self.joint == "knee":
+            if rotation < 175:
+                rotation = 175
+
+            elif rotation > 860:
+                rotation = 860
+
+        elif self.joint == "foot":
+            if rotation < 175:
+                rotation = 175
+
+            elif rotation > 900:
+                rotation = 900
+            
         if speed == -1:
             speed = self.defaultSpeed
         try:
