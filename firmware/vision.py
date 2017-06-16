@@ -10,17 +10,17 @@ from time import sleep
 
 class Vision:
     """Vision Class"""
-    def __init__(self, show_feed, queue, method, object_to_find, symbolarray):
+    def __init__(self, show_feed, queue):
         self.vs = PiVideoStream().start()
         sleep(.2)
         self.queue = queue
         self.show_feed = show_feed
         self.method = "balloon"
-        self.object_to_find = object_to_find
+        #self.object_to_find = object_to_find
         self.status = False
         self.shapes = ['club', 'diamond', 'heart', 'spade']
         self.shape_contours = self.get_reference_shapes_contours()
-        self.symbolarray = symbolarray
+        #self.symbolarray = symbolarray
         self.delivered_white_egg = False
         self.delivered_brown_egg = False
 
@@ -141,7 +141,7 @@ class Vision:
         mask = self.color_filter(hsv, 'balloon')
         _, contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         contour = self.get_largest_contour(contours)
-        
+
         perimeter = cv2.arcLength(contour, True)
         area = cv2.contourArea(contour)
         factor = 4 * math.pi * area / perimeter ** 2
