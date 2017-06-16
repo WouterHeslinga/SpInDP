@@ -71,7 +71,7 @@ class Vision:
                 self.process_shapes(hsv, frame.copy() if self.show_feed else None)
                 
         elif self.method == "balloon":
-            self.get_round_contour(hsv)
+            self.get_round_contour(hsv, frame.copy())
         elif self.method == "egg":
             # Detect egg
             self.test = "egg"
@@ -138,9 +138,10 @@ class Vision:
         return largest_contour
 
     def get_round_contour(self, hsv, frame):
-        mask = self.color_filter(hsv, 'red')
-        contours = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        mask = self.color_filter(hsv, 'balloon')
+        _, contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         contour = self.get_largest_contour(contours)
+        
         perimeter = cv2.arcLength(contour, True)
         area = cv2.contourArea(contour)
         factor = 4 * math.pi * area / perimeter ** 2
