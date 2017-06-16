@@ -17,7 +17,9 @@ class Leg():
     def isEven(self):
         return self.id % 2 == 0
 
-    def setPos(self, x, y, z, speed = -1, add=True, offset=True, invertX=True):
+    def changePos(self, x, y, z, speed = -1, add=True, offset=True, invertX=True):
+        rollx = 40
+        pitchy = 0
         if add == True and invertX == True:
             if self.id == 1 or self.id == 2 or self.id == 3:
                 x *= -1
@@ -30,9 +32,9 @@ class Leg():
             self.x = x
             self.y = y
             self.z = z
-        
+            
         """Sets the rotation of the servo's according to the x y z using kinematics"""
-        degrees = legIk(values = [self.x, self.y, self.z], leg = self.id)
+        degrees = legIk(values = [self.x, self.y, self.z], leg = self.id, rollx=rollx, pitchy=pitchy)
 
         # Offset the angles
         if offset and (self.id != 2 and self.id != 5):

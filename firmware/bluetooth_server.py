@@ -6,10 +6,11 @@ from time import sleep
 from random import randint
 
 class BluetoothServer:
-    def __init__(self, queue, port=1):
+    def __init__(self, queue, main_queue, port=1):
         self.workers = []
         self.port = port
         self.queue = queue
+        self.main_queue = main_queue
         self.socket = socket.socket(socket.AF_BLUETOOTH, socket.SOCK_STREAM, socket.BTPROTO_RFCOMM)
 
     def run(self):
