@@ -56,8 +56,8 @@ class Vision:
         """Process one frame"""        
         frame = self.vs.read()
         # Blur the image and get the hsv values
-        blur = cv2.GaussianBlur(frame, (7,7), 0)
-        hsv = cv2.cvtColor(blur, cv2.COLOR_BGR2HSV)
+        #blur = cv2.GaussianBlur(frame, (7,7), 0)
+        hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
         if self.method == "cards":
             # Detect the shapes
@@ -139,18 +139,31 @@ class Vision:
 
     def get_round_contour(self, hsv, frame):
         mask = self.color_filter(hsv, 'redballoon')
-        _, contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-        cv2.imshow('Mask', mask)
-        for i in range(len(contours)):
-            contour = contours[i]
-            area = cv2.contourArea(contour)
-            if area < 700:
-                continue
-            perimeter = cv2.arcLength(contour, True)
-            factor = 4 * math.pi * area / perimeter ** 2
-            if factor > .5:
-                cv2.drawContours(frame, [contour], -1, (0, 255, 0), 2)
-            self.show_image('round shape', frame)
+        contours = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2]
+        center = None
+        self.show_image('mask', mask)
+        if len(contours) > 0:
+            c = max(contours, key=cv2.contourArea)
+            ((x, y), radius) = cv2.minEnclosingCircle(c)
+            M=cv2.moments(c)
+            try:
+                center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
+            except:
+                pass
+            
+            if radius > 10:
+                cv2.circle(frame, (int(x), int(y)), int(radius),(0,255,255),2)
+                cv2.circle(frame, center, 5, (0,0,255), -1)                
+                color = (255,255,255)
+                print(self.offset_center(frame, center))               
+            
+        self.show_image('round shape', frame)
+
+    def offset_center(self, frame, center):
+        shape = frame.shape
+        x_offset = center[0] - shape[1] / 2
+        y_offset = shape[0] /2 - center[1]
+        return (x_offset, y_offset)
 
     def best_matching_shape(self, contours, shape):
         """Returns the best matching shape, None if not found a match"""
