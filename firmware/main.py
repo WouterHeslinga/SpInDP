@@ -7,10 +7,10 @@ from bluetooth_server import BluetoothServer
 from threading import Event
 
 
-def vision_worker(queue):
+def vision_worker(queue, main_queue):
     """Worker for the vision"""
     print("Starting vision worker")
-    vision = Vision(True, queue)
+    vision = Vision(True, queue, main_queue)
     while True:
         vision.update()
     return
@@ -44,9 +44,10 @@ if __name__ == '__main__':
     queue_main = multiprocessing.Queue()
     queue_motion = multiprocessing.Queue()
     queue_bluetooth = multiprocessing.Queue()
+    queue_vision = multiprocessing.Queue()
 
     # Create the workers
-    # workers.append(multiprocessing.Process(target=vision_worker, args=(queue_vision_web,)))
+    workers.append(multiprocessing.Process(target=vision_worker, args=(queue_vision, queue_main)))
     # workers.append(multiprocessing.Process(target=web_worker, args=(queue_vision_web,)))
     workers.append(multiprocessing.Process(target=motion_controller_worker, args=(queue_motion, queue_main)))
     workers.append(multiprocessing.Process(target=bluetooth_server_worker, args=(queue_bluetooth, queue_main)))
@@ -61,6 +62,9 @@ if __name__ == '__main__':
             commands = queue_main.get()
             if 'temps' in commands:
                 print(commands['temps'])
+            if 'objectcoords' in commands:
+                print(commands['objectcoords'])
+                
 
     # Join the workers
     for worker in workers:

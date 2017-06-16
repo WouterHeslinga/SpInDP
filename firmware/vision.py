@@ -7,14 +7,15 @@ from picamera.array import PiRGBArray
 from picamera import PiCamera
 from time import sleep
 import threading
-
+import motion_controller
 
 class Vision:
     """Vision Class"""
-    def __init__(self, show_feed, queue):
+    def __init__(self, show_feed, queue, queue_main):
         self.vs = PiVideoStream().start()
         sleep(.2)
         self.queue = queue
+        self.queue_main = queue_main
         self.show_feed = show_feed
         self.method = "redballoon"
         #self.object_to_find = object_to_find
@@ -231,7 +232,7 @@ class Vision:
     def send_data(self):
         while True:
             #Send values
-            print(self.data)
+            self.queue_main.put({'objectcoords': self.data})
             self.event.wait(1)
     
     def release(self):
