@@ -1,33 +1,87 @@
 import cv2
+import math
 import numpy as np
+from imutils.video.pivideostream import PiVideoStream
+import imutils
+from picamera.array import PiRGBArray
+from picamera import PiCamera
+from time import sleep
+import threading
+
 
 class Vision:
     """Vision Class"""
     def __init__(self, show_feed, queue):
+        self.vs = PiVideoStream().start()
+        sleep(.2)
         self.queue = queue
-        self.cap = cv2.VideoCapture(0)
         self.show_feed = show_feed
-        self.status = {
-            'symbols': {
-                'heart': False,
-                'spade': False,
-                'club': False,
-                'diamond': False
-            }
-        }
+        self.method = "redballoon"
+        #self.object_to_find = object_to_find
+        self.status = False
         self.shapes = ['club', 'diamond', 'heart', 'spade']
         self.shape_contours = self.get_reference_shapes_contours()
+        #self.symbolarray = symbolarray
+        self.delivered_white_egg = False
+        self.delivered_brown_egg = False
+        self.event = threading.Event()
+        self.data = None
+        self.send_data_worker = threading.Thread(target=self.send_data)
+        self.send_data_worker.start()
+        
+    def find_egg(self, hsv):
+        eggs = ["white", "brown"]
+
+
+        brown = self.color_filter(hsv, 'brownegg')
+        _, brown_contours, _ = cv2.findContours(brown, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        white = self.color_filter(hsv, 'whiteegg')
+        _, white_contours, _ = cv2.findContours(white, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
+        # search for eggs either white or brown
+            # Calibrate gyro sensor 0 point
+            # patrol around to search for an egg if we haven't seen one yet
+            # if found white egg and found white egg == False
+                # pick up white egg
+                # find symbolarray[0]
+                # move to bowl
+                # if close to symbol search blue line
+                # drop egg in bowl
+                # when done continue with brown egg
+            # elif found brown egg and found brown egg == False
+                # pick up brown egg
+                # find symbolarray[0]
+                # move to bowl
+                # if close to symbol search blue line
+                # drop egg in bowl
+                # when done continue with white egg
+            # else patrol to find an egg
 
     def update(self):
-        """Process one frame"""
-        _, frame = self.cap.read()
-
+        """Process one frame"""        
+        frame = self.vs.read()
         # Blur the image and get the hsv values
-        blur = cv2.GaussianBlur(frame, (7,7), 0)
-        hsv = cv2.cvtColor(blur, cv2.COLOR_BGR2HSV)
+        #blur = cv2.GaussianBlur(frame, (7,7), 0)
+        hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
-        # Detect the shapes
-        self.process_shapes(hsv, frame.copy() if self.show_feed else None)
+        if self.method == "cards":
+            # Detect the shapes
+            if self.object_to_find == "heart":
+                self.process_shapes(hsv, frame.copy() if self.show_feed else None)
+            elif self.object_to_find == "spade":
+                self.process_shapes(hsv, frame.copy() if self.show_feed else None)
+            elif self.object_to_find == "club":
+                self.process_shapes(hsv, frame.copy() if self.show_feed else None)
+            elif self.object_to_find == "diamond":
+                self.process_shapes(hsv, frame.copy() if self.show_feed else None)
+                
+        elif self.method == "redballoon":
+            self.get_round_contour(hsv, frame.copy())
+        elif self.method == "egg":
+            # Detect egg
+            self.test = "egg"
+        else:
+            raise ValueError("Wrong method")
 
         self.queue.put(self.status)
         cv2.waitKey(10)
@@ -87,7 +141,36 @@ class Vision:
                 largest_contour = contour
         
         return largest_contour
+
+    def get_round_contour(self, hsv, frame):
+        mask = self.color_filter(hsv, 'redballoon')
+        contours = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2]
+        center = None
+        #self.show_image('mask', mask)
+        if len(contours) > 0:
+            c = max(contours, key=cv2.contourArea)
+            ((x, y), radius) = cv2.minEnclosingCircle(c)
+            M=cv2.moments(c)
+            try:
+                center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
+            except:
+                pass
+            
+            if radius > 10:
+                cv2.circle(frame, (int(x), int(y)), int(radius),(0,255,255),2)
+                cv2.circle(frame, center, 5, (0,0,255), -1)                
+                color = (255,255,255)         
+                self.data = self.offset_center(frame, center)[0]        
+            
+        cv2.imshow('round shape', frame)
     
+    def offset_center(self, frame, center):
+        shape = frame.shape
+        x_offset = float(center[0] - shape[1] / 2)
+        x_offset = float((x_offset / 320) * 180)
+        y_offset = shape[0] /2 - center[1]
+        return (x_offset, y_offset)
+
     def best_matching_shape(self, contours, shape):
         """Returns the best matching shape, None if not found a match"""
         best_shape = None
@@ -131,17 +214,28 @@ class Vision:
         result = None
         if color == 'red':
             result = cv2.inRange(hsv, (0, 180, 80), (255, 240, 255))
-            
-            # HSV colors hue is in 360 deg, so we need values in the negative. Use a seccond range and bitwise those.
-            # result = cv2.bitwise_or(result, cv2.inRange(hsv, (158, 137, 60), (182, 255, 255)))
+        elif color == 'whiteegg':
+            result = cv2.inRange(hsv, (0, 0, 150), (255, 75, 255))
+        elif color == 'brownegg':
+            result = cv2.inRange(hsv, (5, 60, 25), (20, 255, 255))
+        elif color == 'redballoon':
+            result = cv2.inRange(hsv, (0, 159, 114), (204, 245, 255))
+        elif color == 'blue':
+            result = cv2.inRange(hsv, (94, 86, 45), (154, 220, 222))
         elif color == 'black':
             result = cv2.inRange(hsv, (0, 0, 0), (179, 255, 100))
         else:
             raise ValueError('Fool!!, only black and red!')
         return result
 
+    def send_data(self):
+        while True:
+            #Send values
+            print(self.data)
+            self.event.wait(1)
+    
     def release(self):
-        self.cap.release()
+        self.vs.stop()
         cv2.destroyAllWindows()
 
 # If executed instead of import show a little demo
