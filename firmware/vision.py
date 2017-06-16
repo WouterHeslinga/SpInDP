@@ -6,6 +6,7 @@ import imutils
 from picamera.array import PiRGBArray
 from picamera import PiCamera
 from time import sleep
+import threading
 
 
 class Vision:
@@ -23,7 +24,11 @@ class Vision:
         #self.symbolarray = symbolarray
         self.delivered_white_egg = False
         self.delivered_brown_egg = False
-
+        self.event = threading.Event()
+        self.data = None
+        self.send_data_worker = threading.Thread(target=self.send_data)
+        self.send_data_worker.start()
+        
     def find_egg(self, hsv):
         eggs = ["white", "brown"]
 
@@ -154,11 +159,11 @@ class Vision:
             if radius > 10:
                 cv2.circle(frame, (int(x), int(y)), int(radius),(0,255,255),2)
                 cv2.circle(frame, center, 5, (0,0,255), -1)                
-                color = (255,255,255)
-                #print(self.offset_center(frame, center))               
+                color = (255,255,255)         
+                self.data = self.offset_center(frame, center)[0]        
             
         cv2.imshow('round shape', frame)
-
+    
     def offset_center(self, frame, center):
         shape = frame.shape
         x_offset = float(center[0] - shape[1] / 2)
@@ -222,6 +227,12 @@ class Vision:
         else:
             raise ValueError('Fool!!, only black and red!')
         return result
+
+    def send_data(self):
+        while True:
+            #Send values
+            print(self.data)
+            self.event.wait(1)
     
     def release(self):
         self.vs.stop()
