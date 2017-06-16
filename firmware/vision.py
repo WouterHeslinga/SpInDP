@@ -140,7 +140,7 @@ class Vision:
     def get_round_contour(self, hsv, frame):
         mask = self.color_filter(hsv, 'redballoon')
         _, contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-
+        cv2.imshow('Mask', mask)
         for i in range(len(contours)):
             contour = contours[i]
             area = cv2.contourArea(contour)
