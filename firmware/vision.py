@@ -1,4 +1,5 @@
 import cv2
+import math
 import numpy as np
 from imutils.video.pivideostream import PiVideoStream
 import imutils
@@ -9,35 +10,57 @@ from time import sleep
 
 class Vision:
     """Vision Class"""
-    def __init__(self, show_feed, queue, method, object_to_find):
+    def __init__(self, show_feed, queue, method, object_to_find, symbolarray):
         self.vs = PiVideoStream().start()
         sleep(.2)
         self.queue = queue
         self.show_feed = show_feed
-        self.method = method
+        self.method = "balloon"
         self.object_to_find = object_to_find
-        self.status = {
-            'symbols': {
-                'heart': False,
-                'spade': False,
-                'club': False,
-                'diamond': False
-            }
-        }
+        self.status = False
         self.shapes = ['club', 'diamond', 'heart', 'spade']
         self.shape_contours = self.get_reference_shapes_contours()
+        self.symbolarray = symbolarray
+        self.delivered_white_egg = False
+        self.delivered_brown_egg = False
+
+    def find_egg(self, hsv):
+        eggs = ["white", "brown"]
+
+
+        brown = self.color_filter(hsv, 'brownegg')
+        _, brown_contours, _ = cv2.findContours(brown, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        white = self.color_filter(hsv, 'whiteegg')
+        _, white_contours, _ = cv2.findContours(white, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
+        # search for eggs either white or brown
+            # Calibrate gyro sensor 0 point
+            # patrol around to search for an egg if we haven't seen one yet
+            # if found white egg and found white egg == False
+                # pick up white egg
+                # find symbolarray[0]
+                # move to bowl
+                # if close to symbol search blue line
+                # drop egg in bowl
+                # when done continue with brown egg
+            # elif found brown egg and found brown egg == False
+                # pick up brown egg
+                # find symbolarray[0]
+                # move to bowl
+                # if close to symbol search blue line
+                # drop egg in bowl
+                # when done continue with white egg
+            # else patrol to find an egg
 
     def update(self):
         """Process one frame"""        
         frame = self.vs.read()
-        cv2.imshow('Test', frame)
         # Blur the image and get the hsv values
         blur = cv2.GaussianBlur(frame, (7,7), 0)
         hsv = cv2.cvtColor(blur, cv2.COLOR_BGR2HSV)
 
         if self.method == "cards":
             # Detect the shapes
-
             if self.object_to_find == "heart":
                 self.process_shapes(hsv, frame.copy() if self.show_feed else None)
             elif self.object_to_find == "spade":
@@ -48,11 +71,13 @@ class Vision:
                 self.process_shapes(hsv, frame.copy() if self.show_feed else None)
                 
         elif self.method == "balloon":
-            # Detect the balloon
-            
+            self.get_round_contour(hsv)
         elif self.method == "egg":
             # Detect egg
-            
+            self.test = "egg"
+        else:
+            raise ValueError("Wrong method")
+
         self.queue.put(self.status)
         cv2.waitKey(10)
 
@@ -111,7 +136,23 @@ class Vision:
                 largest_contour = contour
         
         return largest_contour
-    
+
+    def get_round_contour(self, hsv, frame):
+        mask = self.color_filter(hsv, 'red')
+        contours = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        contour = self.get_largest_contour(contours)
+        perimeter = cv2.arcLength(contour, True)
+        area = cv2.contourArea(contour)
+        factor = 4 * math.pi * area / perimeter ** 2
+        if factor > .2:
+            cv2.drawContours(frame, [contour], -1, (0, 255, 0), 2)
+            M = cv2.moments(contour)
+            cx = int(M['m10'] / M['m00'])
+            cy = int(M['m01'] / M['m00'])
+            font = cv2.FONT_HERSHEY_SIMPLEX
+            cv2.putText(frame, ("Factor: %f" % factor), (cx, cy), font, .5, (0, 255, 0), 2)
+            self.show_image('round shape', frame)
+
     def best_matching_shape(self, contours, shape):
         """Returns the best matching shape, None if not found a match"""
         best_shape = None
