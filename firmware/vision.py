@@ -15,7 +15,7 @@ class Vision:
         sleep(.2)
         self.queue = queue
         self.show_feed = show_feed
-        self.method = "balloon"
+        self.method = "redballoon"
         #self.object_to_find = object_to_find
         self.status = False
         self.shapes = ['club', 'diamond', 'heart', 'spade']
@@ -70,7 +70,7 @@ class Vision:
             elif self.object_to_find == "diamond":
                 self.process_shapes(hsv, frame.copy() if self.show_feed else None)
                 
-        elif self.method == "balloon":
+        elif self.method == "redballoon":
             self.get_round_contour(hsv, frame.copy())
         elif self.method == "egg":
             # Detect egg
