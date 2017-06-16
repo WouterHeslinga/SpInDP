@@ -5,7 +5,7 @@ import math
 
 
 
-def legIk(x = 0, y = 0, z = 0, values = None):
+def legIk(x = 0, y = 0, z = 0, values = None, leg = -1):
 	if values != None:
 		x = values[0]
 		y = values[1]
@@ -21,7 +21,7 @@ def legIk(x = 0, y = 0, z = 0, values = None):
 	e = z
 	f = 37
 	a = 67.19
-	c = 146
+	c = 145.11
 	
 	l = x
 	coxaalphamax = 54
@@ -29,7 +29,7 @@ def legIk(x = 0, y = 0, z = 0, values = None):
 	if (x != 0):
 		ac = math.atan(float(y)/float(x)) * pifactor
 	else:
-		ac = math.atan(y) * pifactor
+		ac = math.atan(float(y)) * pifactor
 
 	#print (ac)
 	
@@ -58,9 +58,15 @@ def legIk(x = 0, y = 0, z = 0, values = None):
 
 	beta = (math.acos((math.pow(b,2) - math.pow(a,2) - math.pow(c,2))/(-2 * a * c))) * pifactor
 
-	delta = math.atan(d/e) * pifactor
+        if e != 0:
+                delta = math.atan(float(d)/float(e)) * pifactor
+        else:
+                delta = math.atan(float(d)) * pifactor
 
-	epsilon = math.atan(e/d) * pifactor
+        if d != 0:
+                epsilon = math.atan(float(e)/float(d)) * pifactor
+        else:
+                epsilon = math.atan(float(e)) * pifactor
 
 	alphaepsilon = alpha + epsilon
 
