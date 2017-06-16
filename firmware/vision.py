@@ -140,18 +140,20 @@ class Vision:
     def get_round_contour(self, hsv, frame):
         mask = self.color_filter(hsv, 'balloon')
         _, contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-        contour = self.get_largest_contour(contours)
-
-        perimeter = cv2.arcLength(contour, True)
-        area = cv2.contourArea(contour)
-        factor = 4 * math.pi * area / perimeter ** 2
-        if factor > .2:
-            cv2.drawContours(frame, [contour], -1, (0, 255, 0), 2)
-            M = cv2.moments(contour)
-            cx = int(M['m10'] / M['m00'])
-            cy = int(M['m01'] / M['m00'])
-            font = cv2.FONT_HERSHEY_SIMPLEX
-            cv2.putText(frame, ("Factor: %f" % factor), (cx, cy), font, .5, (0, 255, 0), 2)
+        for i in range(len(contours)):
+            contour = contours[i]
+            area = cv2.contourArea(contour)
+            if area < 700:
+                continue
+            perimeter = cv2.arcLength(contour, True)
+            factor = 4 * math.pi * area / perimeter ** 2
+            if factor > .5:
+                cv2.drawContours(frame, [contour], -1, (0, 255, 0), 2)
+                M = cv2.moments(contour)
+                cx = int(M['m10'] / M['m00'])
+                cy = int(M['m01'] / M['m00'])
+                font = cv2.FONT_HERSHEY_SIMPLEX
+                cv2.putText(frame, ("Factor: %f" % factor), (cx, cy), font, .5, (0, 255, 0), 2)
             self.show_image('round shape', frame)
 
     def best_matching_shape(self, contours, shape):
