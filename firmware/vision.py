@@ -141,7 +141,7 @@ class Vision:
         mask = self.color_filter(hsv, 'redballoon')
         contours = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2]
         center = None
-        self.show_image('mask', mask)
+        #self.show_image('mask', mask)
         if len(contours) > 0:
             c = max(contours, key=cv2.contourArea)
             ((x, y), radius) = cv2.minEnclosingCircle(c)
@@ -155,13 +155,14 @@ class Vision:
                 cv2.circle(frame, (int(x), int(y)), int(radius),(0,255,255),2)
                 cv2.circle(frame, center, 5, (0,0,255), -1)                
                 color = (255,255,255)
-                print(self.offset_center(frame, center))               
+                #print(self.offset_center(frame, center))               
             
-        self.show_image('round shape', frame)
+        cv2.imshow('round shape', frame)
 
     def offset_center(self, frame, center):
         shape = frame.shape
-        x_offset = center[0] - shape[1] / 2
+        x_offset = float(center[0] - shape[1] / 2)
+        x_offset = float((x_offset / 320) * 180)
         y_offset = shape[0] /2 - center[1]
         return (x_offset, y_offset)
 
