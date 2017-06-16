@@ -18,8 +18,9 @@ class Leg():
         return self.id % 2 == 0
 
     def changePos(self, x, y, z, speed = -1, add=True, offset=True, invertX=True):
-        rollx = 40
-        pitchy = 0
+        rollx = 50
+        pitchy = 50
+        yawz = 100
         if add == True and invertX == True:
             if self.id == 1 or self.id == 2 or self.id == 3:
                 x *= -1
@@ -34,7 +35,7 @@ class Leg():
             self.z = z
             
         """Sets the rotation of the servo's according to the x y z using kinematics"""
-        degrees = legIk(values = [self.x, self.y, self.z], leg = self.id, rollx=rollx, pitchy=pitchy)
+        degrees = legIk(values = [self.x, self.y, self.z], leg = self.id, rollx=rollx, pitchy=pitchy, yawz=yawz)
 
         # Offset the angles
         if offset and (self.id != 2 and self.id != 5):
@@ -42,11 +43,11 @@ class Leg():
         
 
         self.moveHip(int(degrees[0]), speed)
-        sleep(0.002)
+        sleep(0.001)
         self.moveKnee(int(degrees[1]), speed)
-        sleep(0.002)
+        sleep(0.001)
         self.moveFoot(int(degrees[2]), speed)
-        sleep(0.002)
+        sleep(0.001)
 
                 
     def moveHip(self, rotation, speed = -1):

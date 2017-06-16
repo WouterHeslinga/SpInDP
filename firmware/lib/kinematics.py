@@ -7,7 +7,7 @@ import math
 
 
 
-def legIk(x = 0, y = 0, z = 0, values = None, leg = -1,rollx = 0, pitchy = 0):
+def legIk(x = 0, y = 0, z = 0, values = None, leg = -1,rollx = 0, pitchy = 0, yawz = 0):
 	if values != None:
 		x = values[0]
 		y = values[1]
@@ -17,6 +17,7 @@ def legIk(x = 0, y = 0, z = 0, values = None, leg = -1,rollx = 0, pitchy = 0):
 	#feetpos
 	#posX = 130.12
 	#posY = 0
+
 	bodyikfactor = 0.75
 	if pitchy != 0:
 		if leg == 1 or leg == 2 or leg == 3:
@@ -33,6 +34,12 @@ def legIk(x = 0, y = 0, z = 0, values = None, leg = -1,rollx = 0, pitchy = 0):
 			z = z - (bodyikfactor * rollx)
 		if leg == 2 or leg == 5:
 			z = z - ((bodyikfactor * rollx) * 0.5)
+
+	if yawz != 0:
+                if leg == 1 or leg == 2 or leg == 3:
+                        y = y + (bodyikfactor * yawz)
+                if leg == 4 or leg == 5 or leg == 6:
+                        y = y - (bodyikfactor * yawz)
                 
   
 	pifactor = 180 / math.pi

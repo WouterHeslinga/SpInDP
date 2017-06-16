@@ -20,6 +20,7 @@ def balloon(keyframe, leg):
     elif keyframe == 2:
         if leg.id == 1 or leg.id == 4:
             leg.changePos(-50, -stepWidth / 1.3, 0, offset=False)
+            
     elif keyframe == 3:
         if leg.id == 1 or leg.id == 4:
             leg.changePos(50, stepWidth / 1.3, -200, offset=False)
@@ -28,7 +29,6 @@ def rotate(keyframe, leg, direction = -1):
     stepWidth = 54
     stepHeight = 30
 
-    #legGroup1 =
     offset = False
 
     if keyframe == 0:
