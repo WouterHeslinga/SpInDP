@@ -63,7 +63,6 @@ class BluetoothServer:
                     
                     command = data[:end]
                     split = command.split(":")
-                    print(split)
                     self.execute(client, split)
                     data = data[end+1:] # A half command can exist after send(1024) from the client, so we still need to keep this information
 
@@ -77,4 +76,6 @@ class BluetoothServer:
         if commands[0] == 'servo_info':
             print('Sending: '+ self.servo_info)
             client.send(self.servo_info + '\n')
+        else:
+            self.main_queue.put({'motion_state': commands[1]})
         

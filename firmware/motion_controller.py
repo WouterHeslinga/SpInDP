@@ -29,28 +29,15 @@ class MotionController:
         while self.should_run:
             if not self.queue.empty():
                 command = self.queue.get()
-                if "motion_state" in command:
+                print(command)
+                if 'motion_state' in command:
                     info = command["motion_state"]
-
-                    print("Motion received command: %s" % ', '.join(info))
-                    
-                    if info[0] == "idle":
-                        continue
-                    
+                    if info == "idle":
+                        self.state = "idle"
+                        continue                    
                     else:
-                        self.angle = int(info[1])
-                        """if info[0] == "0":
-                            self.angle = int(info[1])
-                            continue
-                        if info[0] == "90":
-                            self.angle = int(info[1])
-                            continue
-                        if info[0] == "180":
-                            self.angle = int(info[1])
-                            continue
-                        if info[0] == "270":
-                            self.angle = int(info[1])
-                            continue"""
+                        self.angle = int(info)
+                        self.state = "walk"
                         self.play_animation(animation.walk, 4, 0.17)
 
             self.event.wait(.5)
@@ -77,7 +64,7 @@ class MotionController:
         else:
             keyframeUneven = totalKeyframes / 2 + 1
             
-        while self.queue.empty():
+        while self.state == "walk":
             for leg in legs:
                 if leg.isEven:
                     animation(keyframeEven, leg, angle=self.angle)
