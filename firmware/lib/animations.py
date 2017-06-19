@@ -96,8 +96,8 @@ def rotate(keyframe, leg, direction = -1):
         elif leg.id == 5:
             leg.changePos(0, -stepWidth / 2, 0, offset=False)
             
-def walk(keyframe, leg, angle=180):
-    stepWidth = 80
+def walk(keyframe, leg, angle):
+    stepWidth = 70  
     stepHeight = 60
     radfactor = math.pi / 180
     stepWidthY = stepWidth * math.cos(angle * radfactor)
@@ -134,3 +134,15 @@ def walk(keyframe, leg, angle=180):
             leg.changePos(-stepWidthX / 2, -stepWidthY / 2, -stepHeight)
         else:
             leg.changePos(stepWidthX / 2, stepWidthY / 2, 0)
+
+def fly(keyframe,leg):
+    # keyframe 0 is for setup
+    if keyframe == 0:
+        pass
+
+    elif keyframe == 1:
+        leg.setAngles(512,204,512)
+    elif keyframe == 2:
+        leg.setAngles(512,204,305)
+    elif keyframe == 3:
+        leg.setAngles(512, 204,512)

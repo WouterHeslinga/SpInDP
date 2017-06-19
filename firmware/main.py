@@ -61,12 +61,16 @@ if __name__ == '__main__':
             event.wait(.5)
             if not queue_main.empty():
                 commands = queue_main.get()
+                print(commands)
                 if 'servo_info' in commands:
                     queue_bluetooth.put({'servo_info': commands['servo_info']})
+                if 'motion_state' in commands:
+                    queue_motion.put({'motion_state': commands['motion_state']})
+
     except KeyboardInterrupt:
         print('closing bluetooth')
         bluetooth.close()
-        sys.exit()
+        sys.exit()     
 
     # Join the workers
     for worker in workers:
