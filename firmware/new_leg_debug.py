@@ -64,8 +64,6 @@ if __name__ == "__main__":
     legs = map_legs(servos)
     sleep(1)
 
-    print(range(1,19))
-    sleep(15)
     while True:
         try:
             play_animation(animation = animation.walk, totalKeyframes = 4, timeout = 0.15)
