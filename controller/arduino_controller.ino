@@ -96,6 +96,7 @@ const int SW_pin = 3;
 int i = 0;
 
 unsigned long lastTime = 0;
+unsigned long lastHeartbeat = 0;
 
 void setup() {
 
@@ -189,22 +190,47 @@ void setup() {
   scherm();               //hoofdscherm op het scherm zetten
 }
 
+void joyInput();
 void loop() {
-
-  gyrosensor();
   touchscreentouch();
   gyrosensor();
   unsigned long now = millis();
   int timeChange = (now - lastTime);  // Bereken hoeveel tijd er voorbij is gegaan
-  if(timeChange>=50){
-  touchscreenscherm();
-  lastTime = now;
+  int heartbeatTimeout = (now - lastHeartbeat);
+  //Elke seconde een heartbeat sturen om 
+  if(timeChange>=50) {
+    touchscreenscherm();
+    lastTime = now;
+    joyInput();
   }
+  if(heartbeatTimeout >= 2500) {
+    Serial.print("ping\n");
+    lastHeartbeat = now;
+  }
+
   //bluetooth();
 
 }
 
+void joyInput() {
+  xval = analogRead(joyX);    //lees joystick waarden
+  yval = analogRead(joyY);
+  String state = "idle";
+  if(xval > 700) {
+    state = "0";
+  } else if (xval < 400) {
+    state = "180";
+  } else if (yval > 700) {
+    state = "270";
+  } else if (yval < 400) {
+    state = "90";
+  }
+
+  Serial.print((String)"motion_state:" + state + "\n");
+}
+
 void bluetooth() {
+  return;
   if(Serial.available() > 0 ){
     char commando = Serial.read();
     //char commando2 = Serial.read();
@@ -466,7 +492,7 @@ void gyrosensor() {
     if ((mpuIntStatus & 0x10) || fifoCount == 1024) {
         // reset so we can continue cleanly
         mpu.resetFIFO();
-        Serial.println(F("FIFO overflow!"));
+        //Serial.println(F("FIFO overflow!"));
 
     // otherwise, check for DMP data ready interrupt (this should happen frequently)
     } 
@@ -490,12 +516,12 @@ void gyrosensor() {
             mpu.dmpGetQuaternion(&q, fifoBuffer);
             mpu.dmpGetGravity(&gravity, &q);
             mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
-            Serial.print("ypr\t");
-            Serial.print(ypr[0] * 180/M_PI);
-            Serial.print("\t");
-            Serial.print(ypr[1] * 180/M_PI);
-            Serial.print("\t");
-            Serial.println(ypr[2] * 180/M_PI);
+            //Serial.print("ypr\t");
+            //Serial.print(ypr[0] * 180/M_PI);
+            //Serial.print("\t");
+            //Serial.print(ypr[1] * 180/M_PI);
+            //Serial.print("\t");
+            //Serial.println(ypr[2] * 180/M_PI);
         #endif
 
 
@@ -504,7 +530,7 @@ void gyrosensor() {
         //digitalWrite(LED_PIN, blinkState);
     }
     //Serial.println(F("No overflow or interrupt"));
-    Serial.println(i);
+    //Serial.println(i);
     i++;
 }
 
