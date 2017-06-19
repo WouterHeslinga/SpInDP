@@ -46,10 +46,10 @@ if __name__ == '__main__':
     queue_bluetooth = multiprocessing.Queue()
 
     # Create the workers
-    # workers.append(multiprocessing.Process(target=vision_worker, args=(queue_vision_web,)))
+    # workers.append(multiprocessing.Process(target=vision_worker, args=(queue_vision,)))
     # workers.append(multiprocessing.Process(target=web_worker, args=(queue_vision_web,)))
     workers.append(multiprocessing.Process(target=motion_controller_worker, args=(queue_motion, queue_main)))
-    workers.append(multiprocessing.Process(target=bluetooth_server_worker, args=(queue_bluetooth, queue_main)))
+    # workers.append(multiprocessing.Process(target=bluetooth_server_worker, args=(queue_bluetooth, queue_main)))
 
     # Start the workers
     for worker in workers:
@@ -62,6 +62,9 @@ if __name__ == '__main__':
             print(commands)
             if 'servo_info' in commands:
                 queue_bluetooth.put({'servo_info': commands['servo_info']})
+            if 'motion_state' in commands:
+                queue_motion.put({'motion_state': commands['motion_state']})
+            
 
     # Join the workers
     for worker in workers:

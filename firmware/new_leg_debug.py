@@ -66,6 +66,7 @@ if __name__ == "__main__":
 
     while True:
         try:
+            #play_animation(animation = animation.fly, totalKeyframes = 3, timeout = 0.5)
             play_animation(animation = animation.walk, totalKeyframes = 4, timeout = 0.15)
             #play_animation(animation = animation.rotate, totalKeyframes = 4, timeout = 0.1)
             #play_animation(animation = animation.balloon, totalKeyframes = 3, timeout = 0.5)
