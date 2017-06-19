@@ -32,14 +32,13 @@ class MotionController:
     
     def get_servo_info(self):
         try:
-            info = []
-            info.append(str(80)) #battery
-            info.append(str(0)) #angle
+            info = ""
+            info = info + str(80)
+            info = info + ";" + str(0)
             for servo in self.servos:
-                info.append(str(servo.getTemperature()))
-                info.append(str(servo.getAngle()))
+                info = info + ';' + str(servo.getTemperature()) + ',' + str(servo.getAngle());
             
-            return ';'.join(info)
+            return info
         except:
             return None
 
