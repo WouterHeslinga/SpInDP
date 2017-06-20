@@ -59,6 +59,8 @@ if __name__ == '__main__':
     try:
         while should_run:   
             event.wait(.5)
+            #queue_main.put({'motion_state': raw_input("direction: ")})
+            #event.wait(0.1)
             if not queue_main.empty():
                 commands = queue_main.get()
                 if 'servo_info' in commands:
