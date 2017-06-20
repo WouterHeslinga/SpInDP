@@ -63,7 +63,9 @@ class BluetoothServer:
                     
                     command = data[:end]
                     split = command.split(":")
-                    self.execute(client, split)
+                    print(split)
+                    if split[0] != 'ping':
+                        self.execute(client, split)
                     data = data[end+1:] # A half command can exist after send(1024) from the client, so we still need to keep this information
 
             except Exception as ex:
@@ -74,6 +76,8 @@ class BluetoothServer:
 
     def execute(self, client, commands):
         if commands[0] == 'servo_info':
+            if self.servo_info is None:
+                return
             print('Sending: '+ self.servo_info)
             client.send(self.servo_info + '\n')
         else:
