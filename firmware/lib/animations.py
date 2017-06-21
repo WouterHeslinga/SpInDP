@@ -1,5 +1,6 @@
 import leg2 as leg
 import math as math
+from time import sleep
 
 def balloon(keyframe, leg):
     stepWidth = 130
@@ -105,6 +106,11 @@ def walk(keyframe, leg, angle):
     
     # keyframe 0 is for setup
     if keyframe == 0:
+        # set legs to default position
+        leg.changePos(130,0,100, add=False)
+            
+        sleep(0.2)
+
         if leg.isEven():
             leg.changePos(-stepWidthX / 2, -stepWidthY / 2, 0)
             
