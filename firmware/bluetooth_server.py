@@ -1,6 +1,7 @@
 import socket
 import json
 import threading
+import traceback
 
 from time import sleep
 from random import randint
@@ -64,14 +65,16 @@ class BluetoothServer:
                     command = data[:end]
                     split = command.split(":")
                     print(split)
-                    if split[0] != 'ping':
-                        self.execute(client, split)
+                    if len(split) != 0:
+                        if split[0] != 'ping':
+                            self.execute(client, split)
                     data = data[end+1:] # A half command can exist after send(1024) from the client, so we still need to keep this information
 
             except Exception as ex:
                 client.close()
                 print("Client %s disconnected" % address[0])
                 print(ex)
+                traceback.print_exc()
                 return False
 
     def execute(self, client, commands):
@@ -80,6 +83,6 @@ class BluetoothServer:
                 return
             print('Sending: '+ self.servo_info)
             client.send(self.servo_info + '\n')
-        else:
+        elif commands[0] == 'motion_state':
             self.main_queue.put({'motion_state': commands[1]})
         
