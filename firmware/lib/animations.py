@@ -97,6 +97,18 @@ def rotate(keyframe, leg, direction = -1):
         elif leg.id == 5:
             leg.changePos(0, -stepWidth / 2, 0, offset=False)
             
+def idle(keyframe,leg):
+    # keyframe 0 is for setup
+    if keyframe == 0:
+        leg.changePos(130,0,100, add=False)
+
+#poortje
+#leg.changePos(130,0,110, add=False)
+
+#grindbak
+#leg.changePos(130,0,150, add=False)
+    
+
 def walk(keyframe, leg, angle):
     stepWidth = 70  
     stepHeight = 60
@@ -107,9 +119,7 @@ def walk(keyframe, leg, angle):
     # keyframe 0 is for setup
     if keyframe == 0:
         # set legs to default position
-        leg.changePos(130,0,100, add=False)
-            
-        sleep(0.2)
+        leg.changePos(130,0,140, add=False)
 
         if leg.isEven():
             leg.changePos(-stepWidthX / 2, -stepWidthY / 2, 0)
