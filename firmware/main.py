@@ -64,7 +64,7 @@ if __name__ == '__main__':
             if 'temps' in commands:
                 print(commands['temps'])
             if 'objectcoords' in commands:
-                queue_motion.put({'objectcoords': commands['objectcoords']})
+                queue_motion.put({'motion_state': commands['objectcoords']})
 
     try:
         while should_run:   

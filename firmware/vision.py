@@ -160,8 +160,12 @@ class Vision:
             if radius > 10:
                 cv2.circle(frame, (int(x), int(y)), int(radius),(0,255,255),2)
                 cv2.circle(frame, center, 5, (0,0,255), -1)                
-                color = (255,255,255)         
-                self.data = self.offset_center(frame, center)[0]        
+                color = (255,255,255)
+                if(self.method == "redballoon"):
+                    if radius > 100:
+                        self.data = "clap"
+                    else: self.data = self.offset_center(frame, center)[0]
+
             
         cv2.imshow('round shape', frame)
     

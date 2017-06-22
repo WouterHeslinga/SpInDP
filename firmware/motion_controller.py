@@ -120,12 +120,18 @@ class MotionController:
                         self.timeout = 0.5
                         self.totalKeyframes = -1
                         self.state = "idle"                 
-                    else:
+                    elif new_state == "walk":
                         self.angle = int(new_state)
                         self.animation = animations.walk
                         self.timeout = 0.14
                         self.totalKeyframes = 4
                         self.state = "walk"
+                    elif new_state == "clap":
+                        self.angle = 0
+                        self.animation = animations.balloon
+                        self.timeout = .5
+                        self.totalKeyframes = -1
+                        self.state = "clap"
 
             self.event.wait(.1)   
     
