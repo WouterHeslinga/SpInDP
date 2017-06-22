@@ -24,11 +24,7 @@
 MPU6050 mpu;
 //MPU6050 mpu(0x69); // <-- use for AD0 high
 
-
-
 #define OUTPUT_READABLE_YAWPITCHROLL
-
-
 
 //#define LED_PIN 13 // (Arduino is 13, Teensy is 11, Teensy++ is 6)
 //bool blinkState = false;
@@ -69,6 +65,7 @@ void touchscreenscherm();
 void bluetooth();
 void gyrosensor();
 
+//SoftwareSerial serial(7, 8); // RX, TX
 TouchScreen ts = TouchScreen(XP, YP, XM, YM);
 
 int schermkeuze = 0;      //variabele om te kijken of het menu op het scherm staat
@@ -99,13 +96,13 @@ unsigned long lastTime = 0;
 unsigned long lastHeartbeat = 0;
 
 void setup() {
+  //Serial.begin(115200);
 
   pinMode(SW_pin, INPUT);
   digitalWrite(SW_pin, HIGH);
    
   //TFT_BL_ON;            //turn on the background light 
   Tft.TFTinit();          //init TFT library
-
 
   // join I2C bus (I2Cdev library doesn't do this automatically)
     #if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
@@ -140,11 +137,6 @@ void setup() {
       Tft.drawString("MPU6050 connection failed",10,50,1,WHITE);
     }
 
-    // wait for ready
-    //Serial.println(F("\nSend any character to begin DMP programming and demo: "));
-    //while (Serial.available() && Serial.read()); // empty buffer
-    //while (!Serial.available());                 // wait for data
-    //while (Serial.available() && Serial.read()); // empty buffer again
     delay(200);
     
     // load and configure the DMP
@@ -200,8 +192,8 @@ void loop() {
   //Elke seconde een heartbeat sturen om 
   if(timeChange>=50) {
     touchscreenscherm();
-    lastTime = now;
     joyInput();
+    lastTime = now;
   }
   if(heartbeatTimeout >= 2500) {
     Serial.print("ping\n");
@@ -212,54 +204,32 @@ void loop() {
 
 }
 
+String old_state = "idle";
 void joyInput() {
   xval = analogRead(joyX);    //lees joystick waarden
   yval = analogRead(joyY);
-  String state = "idle";
+  String state = old_state;
   if(xval > 700) {
+    //Serial.print("up");
     state = "0";
   } else if (xval < 400) {
+    //Serial.print("down");
     state = "180";
   } else if (yval > 700) {
+    //Serial.print("left");
     state = "270";
   } else if (yval < 400) {
+    //Serial.print("right");
     state = "90";
+  } else {
+    state = "idle";
   }
 
-  Serial.print((String)"motion_state:" + state + "\n");
-}
-
-void bluetooth() {
-  return;
-  if(Serial.available() > 0 ){
-    char commando = Serial.read();
-    //char commando2 = Serial.read();
-    //Serial.println(commando2);
-    
-    if(commando == '1'){
-    //Serial.println("commando ontvangen");
-    StaticJsonBuffer<400> jsonBuffer;
-    JsonObject& root = jsonBuffer.createObject();
-    root["programma"]  = keuze;
-    if (keuze == 1) {
-      root["xwaarde"]     = xval;
-      root["ywaarde"]     = yval;
-      root["switch"]      = Switch;
-    }
-    root["manueel"]     = false;
-    root["bevestig"]    = false;
-    root["tiltsensor"]    = 5;
-    
-    root.printTo(Serial);
-    //root.printTo(Serial);
-    Serial.print('\n');
-    
-    }
-    //Serial.write('\n');
+  if(state != old_state) {
+    old_state = state;
+    Serial.print((String)"motion_state:" + state + "\n");
     
   }
-
-   //delay(0.001);
 }
 
 void touchscreentouch() {
