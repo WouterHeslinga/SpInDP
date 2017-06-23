@@ -66,22 +66,23 @@ def legIk(x = 0, y = 0, z = 0, values = None, leg = -1,rollx = 0, pitchy = 0, ya
 	d = laccent - f
 
 	b = math.sqrt(math.pow(d,2) + math.pow(e,2))
-	#if b > 40000:
-	#	b = 40000
 
 	#alpha
 	value = ((math.pow(a,2) - math.pow(c,2) - math.pow(b,2))/(-2 * c * b))
-	if value > 1: value = 1
+	if value > 1: value = 1 
+	if value < -1: value = -1
 	alpha = (math.acos(value) * pifactor)
 
 	#gamma
 	value = ((math.pow(c,2) - math.pow(b,2) - math.pow(a,2))/(-2 * b * a))
+	if value > 1: value = 1 
 	if value < -1: value = -1
 	gamma = (math.acos(value)) * pifactor
 
 	#beta
 	value = (math.pow(b,2) - math.pow(a,2) - math.pow(c,2))/(-2 * a * c)
-	if value > 1: value = 1
+	if value > 1: value = 1 
+	if value < -1: value = -1
 	beta = (math.acos(value)) * pifactor
 
 
@@ -108,7 +109,7 @@ def legIk(x = 0, y = 0, z = 0, values = None, leg = -1,rollx = 0, pitchy = 0, ya
 	afs = (af + 150) * sfactor
 	ats = (150 - at) * sfactor
   
-	if leg == 1:
+	if leg == -1:
 		print "Pos: [%d,%d,%d]" % (x,y,z),
 		print("Degrees: [%d,%d,%d]\n" % (acs,afs,ats))
 	return [acs,afs,ats]

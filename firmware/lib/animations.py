@@ -100,7 +100,7 @@ def rotate(keyframe, leg, direction = -1):
 def idle(keyframe,leg):
     # keyframe 0 is for setup
     if keyframe == 0:
-        leg.changePos(130,0,100, add=False)
+        leg.changePos(130,0,110, add=False)
 
 #poortje
 #leg.changePos(130,0,110, add=False)
@@ -111,45 +111,58 @@ def idle(keyframe,leg):
 
 def walk(keyframe, leg, angle):
     stepWidth = 70  
-    stepHeight = 60
+    stepHeight = 60 *-1
     radfactor = math.pi / 180
     stepWidthY = stepWidth * math.cos(angle * radfactor)
     stepWidthX = stepWidth * math.sin(angle * radfactor)
+
+    startPos = [130,0,110]
+    startPosX = startPos[0]
+    startPosY = startPos[1]
+    startPosZ = startPos[2]
     
     # keyframe 0 is for setup
     if keyframe == 0:
         # set legs to default position
-        leg.changePos(130,0,140, add=False)
+        leg.changePos(130,0,110, add=False, apply=False)
 
         if leg.isEven():
-            leg.changePos(-stepWidthX / 2, -stepWidthY / 2, 0)
+            leg.changePos(startPosX - (stepWidthX / 2), startPosY - (stepWidthY / 2), startPosZ - 0, add=False)
             
         else:
-            leg.changePos(stepWidthX / 2, stepWidthY / 2, 0)
+            leg.changePos(startPosX + (stepWidthX / 2), startPosY + (stepWidthY / 2), startPosZ + 0, add=False)
         
     elif keyframe == 1:
         if leg.isEven():
-            leg.changePos(stepWidthX / 2, stepWidthY / 2, 0)
+            #leg.changePos(stepWidthX / 2, stepWidthY / 2, 0)
+            leg.changePos(startPosX, startPosY, startPosZ, add=False)
         else:
-            leg.changePos(-stepWidthX / 2, -stepWidthY / 2, stepHeight)
+            #leg.changePos(-stepWidthX / 2, -stepWidthY / 2, stepHeight)
+            leg.changePos(startPosX, startPosY, startPosZ + stepHeight, add=False)
         
     elif keyframe == 2:
         if leg.isEven():
-            leg.changePos(stepWidthX / 2, stepWidthY / 2, 0)
+            #leg.changePos(stepWidthX / 2, stepWidthY / 2, 0)
+            leg.changePos(startPosX + (stepWidthX / 2), startPosY + (stepWidthY / 2), startPosZ, add=False)
         else:
-            leg.changePos(-stepWidthX / 2, -stepWidthY / 2, -stepHeight)
+            #leg.changePos(-stepWidthX / 2, -stepWidthY / 2, -stepHeight)
+            leg.changePos(startPosX - (stepWidthX / 2), startPosY - (stepWidthY / 2), startPosZ, add=False)
         
     elif keyframe == 3:
         if leg.isEven():
-            leg.changePos(-stepWidthX / 2, -stepWidthY / 2, stepHeight)
+            #leg.changePos(-stepWidthX / 2, -stepWidthY / 2, stepHeight)
+            leg.changePos(startPosX, startPosY, startPosZ + stepHeight, add=False)
         else:
-            leg.changePos(stepWidthX / 2, stepWidthY / 2, 0)
+            #leg.changePos(stepWidthX / 2, stepWidthY / 2, 0)
+            leg.changePos(startPosX, startPosY, startPosZ, add=False)
         
     elif keyframe == 4:
         if leg.isEven():
-            leg.changePos(-stepWidthX / 2, -stepWidthY / 2, -stepHeight)
+            #leg.changePos(-stepWidthX / 2, -stepWidthY / 2, -stepHeight)
+            leg.changePos(startPosX - (stepWidthX / 2), startPosY - (stepWidthY / 2), startPosZ, add=False)
         else:
-            leg.changePos(stepWidthX / 2, stepWidthY / 2, 0)
+            #leg.changePos(stepWidthX / 2, stepWidthY / 2, 0)
+            leg.changePos(startPosX + (stepWidthX / 2), startPosY + (stepWidthY / 2), startPosZ, add=False)
 
 def fly(keyframe,leg):
     # keyframe 0 is for setup

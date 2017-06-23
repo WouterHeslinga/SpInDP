@@ -32,9 +32,6 @@ class MotionController:
 
             if self.state != "idle" and self.animation != None:
                 animation = self.animation
-                # set legs to start position
-                for leg in self.legs:
-                    animation(0, leg, angle=self.angle)
                 sleep(self.timeout)
                 servo_info_timer += self.timeout
 
@@ -90,7 +87,7 @@ class MotionController:
                             servo_info_timer = 0
 
             
-            self.event.wait(0.05)
+            sleep(0.05)
             servo_info_timer += 0.05
 
             if servo_info_timer > servo_info_interval:
@@ -109,6 +106,9 @@ class MotionController:
                         try:
                             angleValue = int(new_state)
                             self.angle = angleValue
+                            # set legs to start position
+                            #for leg in self.legs:
+                            #    self.animation(0, leg, angle=self.angle)
                         except:
                             pass
                         continue
@@ -123,6 +123,9 @@ class MotionController:
                     elif new_state == "walk":
                         self.angle = int(new_state)
                         self.animation = animations.walk
+                        # set legs to start position
+                        for leg in self.legs:
+                            self.animation(0, leg, angle=self.angle)
                         self.timeout = 0.14
                         self.totalKeyframes = 4
                         self.setup_keyframes()
