@@ -17,7 +17,7 @@ class Leg():
     def isEven(self):
         return self.id % 2 == 0
 
-    def changePos(self, x, y, z, speed = -1, add=True, offset=True, invertX=True):
+    def changePos(self, x, y, z, speed = -1, add=True, offset=True, invertX=True, apply=True):
         rollx = 0
         pitchy = 0
         yawz = 0
@@ -41,13 +41,13 @@ class Leg():
         if offset and (self.id != 2 and self.id != 5):
             degrees[0] += (-153 if (self.id == 1 or self.id == 4) else 153)
         
-
-        self.moveHip(int(degrees[0]), speed)
-        sleep(0.001)
-        self.moveKnee(int(degrees[1]), speed)
-        sleep(0.001)
-        self.moveFoot(int(degrees[2]), speed)
-        sleep(0.001)
+        if apply:
+            self.moveHip(int(degrees[0]), speed)
+            sleep(0.001)
+            self.moveKnee(int(degrees[1]), speed)
+            sleep(0.001)
+            self.moveFoot(int(degrees[2]), speed)
+            sleep(0.001)
 
     def setAngles(self, coxa, femur, tibia, speed = -1, offset=True):
         degrees = [coxa, femur, tibia]
