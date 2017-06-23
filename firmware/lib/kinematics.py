@@ -3,15 +3,13 @@
 from time import sleep
 import math
 
-
-
-
-
 def legIk(x = 0, y = 0, z = 0, values = None, leg = -1,rollx = 0, pitchy = 0, yawz = 0):
 	if values != None:
 		x = values[0]
 		y = values[1]
 		z = values[2]
+
+
 	#legIk(130.19, 0, 74.90)
 	#servo omhoog is 512+, servo naar rechts is -
 	#feetpos
@@ -58,32 +56,34 @@ def legIk(x = 0, y = 0, z = 0, values = None, leg = -1,rollx = 0, pitchy = 0, ya
 	else:
 		ac = math.atan(float(y)) * pifactor
 
-	#print (ac)
 
 	smallestl = math.cos(coxaalphamaxhalf) * l
 
 	totalstep = 2 * math.sqrt(math.pow(l,2) - math.pow(smallestl,2))
 
-	#if ac > (0.5 * coxaalphamax):
-	#ac = abs(ac) - (0.5 * coxaalphamax)
-	#else:
-	#ac = (0.5 * coxaalphamax) - abs(ac)
-
-	#print (ac)
-
 	laccent = smallestl / (math.cos(ac * radfactor))
-
-	#print (laccent)
 
 	d = laccent - f
 
 	b = math.sqrt(math.pow(d,2) + math.pow(e,2))
+	#if b > 40000:
+	#	b = 40000
 
-	alpha = (math.acos((math.pow(a,2) - math.pow(c,2) - math.pow(b,2))/(-2 * c * b))) * pifactor
+	#alpha
+	value = ((math.pow(a,2) - math.pow(c,2) - math.pow(b,2))/(-2 * c * b))
+	if value > 1: value = 1
+	alpha = (math.acos(value) * pifactor)
 
-	gamma = (math.acos((math.pow(c,2) - math.pow(b,2) - math.pow(a,2))/(-2 * b * a))) * pifactor
+	#gamma
+	value = ((math.pow(c,2) - math.pow(b,2) - math.pow(a,2))/(-2 * b * a))
+	if value < -1: value = -1
+	gamma = (math.acos(value)) * pifactor
 
-	beta = (math.acos((math.pow(b,2) - math.pow(a,2) - math.pow(c,2))/(-2 * a * c))) * pifactor
+	#beta
+	value = (math.pow(b,2) - math.pow(a,2) - math.pow(c,2))/(-2 * a * c)
+	if value > 1: value = 1
+	beta = (math.acos(value)) * pifactor
+
 
 	if e != 0:
 		delta = math.atan(float(d)/float(e)) * pifactor
@@ -108,6 +108,7 @@ def legIk(x = 0, y = 0, z = 0, values = None, leg = -1,rollx = 0, pitchy = 0, ya
 	afs = (af + 150) * sfactor
 	ats = (150 - at) * sfactor
   
-
-  
+	if leg == 1:
+		print "Pos: [%d,%d,%d]" % (x,y,z),
+		print("Degrees: [%d,%d,%d]\n" % (acs,afs,ats))
 	return [acs,afs,ats]
