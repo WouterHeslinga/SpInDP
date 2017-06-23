@@ -24,11 +24,7 @@
 MPU6050 mpu;
 //MPU6050 mpu(0x69); // <-- use for AD0 high
 
-
-
 #define OUTPUT_READABLE_YAWPITCHROLL
-
-
 
 //#define LED_PIN 13 // (Arduino is 13, Teensy is 11, Teensy++ is 6)
 //bool blinkState = false;
@@ -41,14 +37,8 @@ uint16_t packetSize;    // expected DMP packet size (default is 42 bytes)
 uint16_t fifoCount;     // count of all bytes currently in FIFO
 uint8_t fifoBuffer[64]; // FIFO storage buffer
 
-// orientation/motion vars
-Quaternion q;           // [w, x, y, z]         quaternion container
-//VectorInt16 aa;         // [x, y, z]            accel sensor measurements
-//VectorInt16 aaReal;     // [x, y, z]            gravity-free accel sensor measurements
-//VectorInt16 aaWorld;    // [x, y, z]            world-frame accel sensor measurements
-VectorFloat gravity;    // [x, y, z]            gravity vector
-//float euler[3];         // [psi, theta, phi]    Euler angle container
-float ypr[3];           // [yaw, pitch, roll]   yaw/pitch/roll container and gravity vector
+int switch_toggle = 0;
+int switch_toggle_state = 0;
 
 
 // ================================================================
@@ -60,8 +50,6 @@ void dmpDataReady() {
     mpuInterrupt = true;
 }
 
-
-
 void menu();
 void scherm();
 void touchscreentouch();
@@ -69,16 +57,13 @@ void touchscreenscherm();
 void bluetooth();
 void gyrosensor();
 
+//SoftwareSerial serial(7, 8); // RX, TX
 TouchScreen ts = TouchScreen(XP, YP, XM, YM);
 
-int schermkeuze = 0;      //variabele om te kijken of het menu op het scherm staat
-int keuze = 1;            //variabele voor de keuze die geselecteerd is
+//int schermkeuze = 0;      //variabele om te kijken of het menu op het scherm staat
+//int keuze = 1;            //variabele voor de keuze die geselecteerd is
 float voltage = 11.1;     //variabele voor informatie die op het scherm kan staan
 float voltagelast = 0;
-float xval = 0;
-float xvallast = 0;
-float yval = 0;
-float yvallast = 0;
 int Switch = 0;
 int Switchlast = 0;
 float xvalgyro = 0;
@@ -88,24 +73,46 @@ float yvalgyrolast = 0;
 float zvalgyro = 0;
 float zvalgyrolast = 0;
 
+//Pins
+int pinJoyX = A6;
+int pinJoyY = A7;
 
-//define joystick pins (analog)
-int joyX = A6;
-int joyY = A7;
+struct Values {
+  //Menu and display
+  int screen_choice = 1;
+  int show_screen = 0;
+  //Joystick
+  int joy_x = 0;
+  int joy_y = 0;
+  //Gyro
+  int pitch = 0;
+  int yaw = 0;
+  int rol = 0;
+  //Changed bools
+  bool screen_changed = false;
+  bool joy_changed = false;
+  bool gyro_changed = false;
+};
+Values values;
+Values last_values;
+bool values_changed = false;
+
 const int SW_pin = 3;
-int i = 0;
 
 unsigned long lastTime = 0;
 unsigned long lastHeartbeat = 0;
 
+/**
+* Sets up the pins and other hardware like the display and gyrosensor
+*/
 void setup() {
+  //Serial.begin(115200);
 
   pinMode(SW_pin, INPUT);
   digitalWrite(SW_pin, HIGH);
    
   //TFT_BL_ON;            //turn on the background light 
   Tft.TFTinit();          //init TFT library
-
 
   // join I2C bus (I2Cdev library doesn't do this automatically)
     #if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
@@ -140,11 +147,6 @@ void setup() {
       Tft.drawString("MPU6050 connection failed",10,50,1,WHITE);
     }
 
-    // wait for ready
-    //Serial.println(F("\nSend any character to begin DMP programming and demo: "));
-    //while (Serial.available() && Serial.read()); // empty buffer
-    //while (!Serial.available());                 // wait for data
-    //while (Serial.available() && Serial.read()); // empty buffer again
     delay(200);
     
     // load and configure the DMP
@@ -190,79 +192,12 @@ void setup() {
   scherm();               //hoofdscherm op het scherm zetten
 }
 
-void joyInput();
-void loop() {
-  touchscreentouch();
-  gyrosensor();
-  unsigned long now = millis();
-  int timeChange = (now - lastTime);  // Bereken hoeveel tijd er voorbij is gegaan
-  int heartbeatTimeout = (now - lastHeartbeat);
-  //Elke seconde een heartbeat sturen om 
-  if(timeChange>=50) {
-    touchscreenscherm();
-    lastTime = now;
-    joyInput();
-  }
-  if(heartbeatTimeout >= 2500) {
-    Serial.print("ping\n");
-    lastHeartbeat = now;
-  }
-
-  //bluetooth();
-
-}
-
-void joyInput() {
-  xval = analogRead(joyX);    //lees joystick waarden
-  yval = analogRead(joyY);
-  String state = "idle";
-  if(xval > 700) {
-    state = "0";
-  } else if (xval < 400) {
-    state = "180";
-  } else if (yval > 700) {
-    state = "270";
-  } else if (yval < 400) {
-    state = "90";
-  }
-
-  Serial.print((String)"motion_state:" + state + "\n");
-}
-
-void bluetooth() {
-  return;
-  if(Serial.available() > 0 ){
-    char commando = Serial.read();
-    //char commando2 = Serial.read();
-    //Serial.println(commando2);
-    
-    if(commando == '1'){
-    //Serial.println("commando ontvangen");
-    StaticJsonBuffer<400> jsonBuffer;
-    JsonObject& root = jsonBuffer.createObject();
-    root["programma"]  = keuze;
-    if (keuze == 1) {
-      root["xwaarde"]     = xval;
-      root["ywaarde"]     = yval;
-      root["switch"]      = Switch;
-    }
-    root["manueel"]     = false;
-    root["bevestig"]    = false;
-    root["tiltsensor"]    = 5;
-    
-    root.printTo(Serial);
-    //root.printTo(Serial);
-    Serial.print('\n');
-    
-    }
-    //Serial.write('\n');
-    
-  }
-
-   //delay(0.001);
-}
-
-void touchscreentouch() {
+/**
+* Gets the input of the touchscreen and changes the value of the selected
+* screen and if the menu needs to be displayed. Also handles the menu selection
+* logic
+*/
+void input_touchscreen() {
     // a point object holds x y and z coordinates.
   Point p = ts.getPoint();      //kijken of en waar er op het scherm gedrukt wordt
 
@@ -274,64 +209,192 @@ void touchscreentouch() {
   // pressure of 0 means no pressing!
   if (p.z > __PRESURE) {        //om te bepalen of er op een knop wordt gedrukt
       //om te bepalen welke knop er wordt ingedrukt
-      if(p.y > 7 && p.y < 27 && p.x > 7 && p.x < 62 && schermkeuze == 0)
+      if(p.y > 7 && p.y < 27 && p.x > 7 && p.x < 62 && values.screen_choice == 0)
       {
         menu();           //menu op het scherm zetten
-        schermkeuze = 1;
+        values.show_screen = 1;
       }
-      else if (p.y > 7 && p.y < 27 && p.x > 7 && p.x < 62 && schermkeuze == 1)
+      else if (p.y > 7 && p.y < 27 && p.x > 7 && p.x < 62 && values.screen_choice == 1)
       {
         scherm();
-        schermkeuze = 0;
+        values.show_screen = 0;
       }
-      else if (p.y > 7 && p.y < 30 && p.x > 70 && p.x < 220 && schermkeuze == 1)
+      else if (p.y > 7 && p.y < 30 && p.x > 70 && p.x < 220 && values.screen_choice == 1)
       {
         scherm();
-        schermkeuze = 0;
-        keuze = 1;
+        values.show_screen = 0;
+        values.screen_choice = 1;
       }
-      else if (p.y > 31 && p.y < 57 && p.x > 70 && p.x < 220 && schermkeuze == 1)
+      else if (p.y > 31 && p.y < 57 && p.x > 70 && p.x < 220 && values.screen_choice == 1)
       {
         scherm();
-        schermkeuze = 0;
-        keuze = 2;
+        values.show_screen = 0;
+        values.screen_choice = 2;
       }
-      else if (p.y > 58 && p.y < 84 && p.x > 70 && p.x < 220 && schermkeuze == 1)
+      else if (p.y > 58 && p.y < 84 && p.x > 70 && p.x < 220 && values.screen_choice == 1)
       {
         scherm();
-        schermkeuze = 0;
-        keuze = 3;
+        values.show_screen = 0;
+        values.screen_choice = 3;
       }
-      else if (p.y > 85 && p.y < 111 && p.x > 70 && p.x < 220 && schermkeuze == 1)
+      else if (p.y > 85 && p.y < 111 && p.x > 70 && p.x < 220 && values.screen_choice == 1)
       {
         scherm();
-        schermkeuze = 0;
-        keuze = 4;
+        values.show_screen = 0;
+        values.screen_choice = 4;
       }
-      else if (p.y > 112 && p.y < 138 && p.x > 70 && p.x < 220 && schermkeuze == 1)
+      else if (p.y > 112 && p.y < 138 && p.x > 70 && p.x < 220 && values.screen_choice == 1)
       {
         scherm();
-        schermkeuze = 0;
-        keuze = 5;
+        values.show_screen = 0;
+        values.screen_choice = 5;
       }
-      /*else
-      {
-         scherm();
-         schermkeuze = 0;
-      }*/
 
       voltagelast = 0;
-      xvallast = 0;
-      yvallast = 0;
       Switchlast = 0;
   }
 }
 
+/**
+* Gets the input from the gyro and converts it automatically
+* to degrees, result is a pitch yaw and roll
+*/
+void input_gyro() {
+  Quaternion q;
+  VectorFloat gravity;
+  float ypr[3];
+
+  // if programming failed, don't try to do anything
+  if (!dmpReady) return;
+  // wait for MPU interrupt or extra packet(s) available
+  while (!mpuInterrupt && fifoCount < packetSize ) { }
+
+  // reset interrupt flag and get INT_STATUS byte
+  mpuInterrupt = false;
+  mpuIntStatus = mpu.getIntStatus();
+
+  //Serial.println(F("get FIFO count!"));
+  // get current FIFO count
+  fifoCount = mpu.getFIFOCount();
+
+  //Serial.println(F("check for overflow!"));
+  // check for overflow (this should never happen unless our code is too inefficient)
+  if ((mpuIntStatus & 0x10) || fifoCount == 1024) {
+      // reset so we can continue cleanly
+      mpu.resetFIFO();
+      //Serial.println(F("FIFO overflow!"));
+
+  // otherwise, check for DMP data ready interrupt (this should happen frequently)
+  } 
+  else if (mpuIntStatus & 0x02) {
+      // wait for correct available data length, should be a VERY short wait
+      while (fifoCount < packetSize) fifoCount = mpu.getFIFOCount();
+
+      // read a packet from FIFO
+      mpu.getFIFOBytes(fifoBuffer, packetSize);
+      mpu.resetFIFO();
+      
+      // track FIFO count here in case there is > 1 packet available
+      // (this lets us immediately read more without waiting for an interrupt)
+      fifoCount -= packetSize;
+
+      #ifdef OUTPUT_READABLE_YAWPITCHROLL
+          // display Euler angles in degrees
+          mpu.dmpGetQuaternion(&q, fifoBuffer);
+          mpu.dmpGetGravity(&gravity, &q);
+          mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
+          values.pitch = (ypr[1] * 180/M_PI);    //lees joystick waarden
+          values.rol = (ypr[2] * 180/M_PI);
+          values.yaw = (ypr[0] * 180/M_PI);
+      #endif
+  }
+}
+
+/**
+* Checks if the values are changed so that the screen render knows what te re render
+*/
+void check_values_changed() {
+  values.screen_changed = (values.screen_choice != last_values.screen_choice ||
+    values.show_screen != last_values.show_screen);
+  values.joy_changed = (values.joy_x != last_values.joy_x ||
+    values.joy_y != last_values.joy_x);
+  values.gyro_changed = (values.pitch != last_values.pitch ||
+    values.yaw != last_values.yaw ||
+    values.rol != last_values.rol);
+}
+
+/**
+* Updates all the inputs and then checks for changes
+*/
+void input() {
+  last_values = values;
+  //Touchscreen
+  input_touchscreen();
+
+  //Joysticks
+  values.joy_x = analogRead(pinJoyX);
+  values.joy_y = analogRead(pinJoyY);  
+
+  //Gyro
+  input_gyro();
+
+  check_values_changed();
+}
+
+/**
+* Runs every cycle
+*/
+void loop() {
+  input();
+  unsigned long now = millis();
+  int timeChange = (now - lastTime);  // Bereken hoeveel tijd er voorbij is gegaan
+  int heartbeatTimeout = (now - lastHeartbeat);
+  //Elke seconde een heartbeat sturen om 
+  if(timeChange>=50) {
+    touchscreenscherm();
+    joyInput();
+    lastTime = now;
+  }
+  if(heartbeatTimeout >= 2500) {
+    Serial.print("ping\n");
+    lastHeartbeat = now;
+  }
+
+  //bluetooth();
+
+}
+
+String old_state = "idle";
+void joyInput() {
+  String state = old_state;
+  if(values.joy_x > 700) {
+    //Serial.print("up");
+    state = "0";
+  } else if (values.joy_x < 400) {
+    //Serial.print("down");
+    state = "180";
+  } else if (values.joy_y > 700) {
+    //Serial.print("left");
+    state = "270";
+  } else if (values.joy_y < 400) {
+    //Serial.print("right");
+    state = "90";
+  } else {
+    state = "idle";
+  }
+
+  if(state != old_state) {
+    old_state = state;
+    Serial.print((String)"motion_state:" + state + "\n");
+    
+  }
+}
 
 void touchscreenscherm() {
-
-  if(schermkeuze != 1) {
-    switch(keuze) {
+  int xval = 0;
+  int yval = 0;
+  if(values.show_screen != 1) {
+    switch(values.screen_choice) {
       case 1:
         Tft.drawString("Manueel",73,10,2,WHITE);
         Tft.drawString("Joystick",10,180,2,WHITE);
@@ -343,28 +406,23 @@ void touchscreenscherm() {
         Tft.drawString("Y =",125,120,2,WHITE);
         Tft.drawString("Z =",10,140,2,WHITE);
 
-
-        xval = analogRead(joyX);    //lees joystick waarden
-        yval = analogRead(joyY);
         Switch = digitalRead(SW_pin);
-        if ((xval != xvallast || yval != yvallast || Switch != Switchlast) && schermkeuze != 1)  //kijken of er waarden zijn verandert
+        if (values.show_screen != 1 && values.joy_changed)  //kijken of er waarden zijn verandert
         {
           Tft.fillRectangle(50, 200, 75,15,BLACK);
-          Tft.drawNumber(xval,50,200,2,WHITE);
+          Tft.drawNumber(values.joy_x,50,200,2,WHITE);
           Tft.fillRectangle(170, 200, 75,15,BLACK);
-          Tft.drawNumber(yval,170,200,2,WHITE);
+          Tft.drawNumber(values.joy_y,170,200,2,WHITE);
           Tft.fillRectangle(110, 220, 15,15,BLACK);
           Tft.drawNumber(Switch,110,220,2,WHITE);
-          xvallast = xval;
-          yvallast = yval;
           Switchlast = Switch;
         }
         
         
-        xvalgyro = (ypr[1] * 180/M_PI);    //lees joystick waarden
-        yvalgyro = (ypr[2] * 180/M_PI);
-        zvalgyro = (ypr[0] * 180/M_PI);
-        if ((xvalgyro != xvalgyrolast || yvalgyro != yvalgyrolast || zvalgyro != zvalgyrolast) && schermkeuze != 1)  //kijken of er waarden zijn verandert
+        xvalgyro = values.yaw;
+        yvalgyro = values.pitch;
+        zvalgyro = values.rol;
+        if ((xvalgyro != xvalgyrolast || yvalgyro != yvalgyrolast || zvalgyro != zvalgyrolast) && values.show_screen != 1)  //kijken of er waarden zijn verandert
         {
           Tft.fillRectangle(50, 120, 75,15,BLACK);
           Tft.drawFloat(xvalgyro,2,50,120,2,WHITE);
@@ -372,9 +430,6 @@ void touchscreenscherm() {
           Tft.drawFloat(yvalgyro,2,165,120,2,WHITE);
           Tft.fillRectangle(50, 140, 85,15,BLACK);
           Tft.drawFloat(zvalgyro,2,50,140,2,WHITE);
-          xvalgyrolast = xvalgyro;
-          yvalgyrolast = yvalgyro;
-          zvalgyrolast = zvalgyro;
         }
         break;
       case 2:
@@ -386,8 +441,8 @@ void touchscreenscherm() {
       case 4:
         Tft.drawString("Keuze 4",73,10,2,WHITE);
 
-        xval = ypr[1] * 180/M_PI;    //lees joystick waarden
-        yval = ypr[2] * 180/M_PI;
+        xval = values.pitch;
+        yval = values.rol;
         xval = map(xval, -40, 40, 0, 230);
         yval = map(yval, -30, 30, 0, 310);
         xval = constrain(xval, 0, 230);
@@ -401,9 +456,8 @@ void touchscreenscherm() {
         break;
       case 5:
         Tft.drawString("Keuze 5",73,10,2,WHITE);
-
-        xval = analogRead(joyX);    //lees joystick waarden
-        yval = analogRead(joyY);
+        xval = values.joy_x;
+        yval = values.joy_y;
         xval = map(xval, 0, 1023, 0, 230);
         yval = map(yval, 0, 1023, 0, 310);
         xval = constrain(xval, 0, 230);
@@ -415,12 +469,11 @@ void touchscreenscherm() {
         }
         
         break;
-       
     }
   }
     
 
-    if (voltage != voltagelast && schermkeuze != 1)  //kijken of er waarden zijn verandert
+    if (voltage != voltagelast && values.show_screen != 1)  //kijken of er waarden zijn verandert
     {
       Tft.fillRectangle(120, 160, 50,15,BLACK);
       Tft.drawFloat(voltage,1,120,160,2,WHITE);   // draw float: voltage, (120, 200), size: 2, decimal: 1, color: WHITE
@@ -438,12 +491,6 @@ void menu() {   //functie om het menu op het scherm te zetten
   Tft.drawString("Keuze 3",73,64,2,BLACK);
   Tft.drawString("Keuze 4",73,91,2,BLACK);
   Tft.drawString("Keuze 5",73,118,2,BLACK);
-
-  //Tft.drawHorizontalLine(70,30,150,BLUE);
-  //Tft.drawHorizontalLine(70,57,150,BLUE);
-  //Tft.drawHorizontalLine(70,84,150,BLUE);
-  //Tft.drawHorizontalLine(70,111,150,BLUE);
-  //Tft.drawHorizontalLine(70,138,150,BLUE);
 }
 
 void scherm() {   //functie om het standaard scherm op het scherm te zetten
@@ -456,81 +503,3 @@ void scherm() {   //functie om het standaard scherm op het scherm te zetten
   Tft.drawString("Voltage:",10,160,2,WHITE);  // draw string: "Voltage", (10, 200), size: 2, color: WHITE
   
 }
-
-
-void gyrosensor() {
-  // if programming failed, don't try to do anything
-    if (!dmpReady) return;
-
-    //Serial.println(F("dmp ready"));
-
-    // wait for MPU interrupt or extra packet(s) available
-    while (!mpuInterrupt && fifoCount < packetSize ) {
-        // other program behavior stuff here
-        // .
-        // .
-        // .
-        // if you are really paranoid you can frequently test in between other
-        // stuff to see if mpuInterrupt is true, and if so, "break;" from the
-        // while() loop to immediately process the MPU data
-        // .
-        // .
-        // .
-    }
-
-    //Serial.println(F("mpu get int status en reset interrupt flag"));
-    // reset interrupt flag and get INT_STATUS byte
-    mpuInterrupt = false;
-    mpuIntStatus = mpu.getIntStatus();
-
-    //Serial.println(F("get FIFO count!"));
-    // get current FIFO count
-    fifoCount = mpu.getFIFOCount();
-
-    //Serial.println(F("check for overflow!"));
-    // check for overflow (this should never happen unless our code is too inefficient)
-    if ((mpuIntStatus & 0x10) || fifoCount == 1024) {
-        // reset so we can continue cleanly
-        mpu.resetFIFO();
-        //Serial.println(F("FIFO overflow!"));
-
-    // otherwise, check for DMP data ready interrupt (this should happen frequently)
-    } 
-    else if (mpuIntStatus & 0x02) {
-      //Serial.println(F("interrupt"));
-        // wait for correct available data length, should be a VERY short wait
-        while (fifoCount < packetSize) fifoCount = mpu.getFIFOCount();
-
-        //Serial.println(F("read a packet from fifo"));
-        // read a packet from FIFO
-        mpu.getFIFOBytes(fifoBuffer, packetSize);
-        mpu.resetFIFO();
-        
-        // track FIFO count here in case there is > 1 packet available
-        // (this lets us immediately read more without waiting for an interrupt)
-        fifoCount -= packetSize;
-
-        //Serial.println(F("read data"));
-        #ifdef OUTPUT_READABLE_YAWPITCHROLL
-            // display Euler angles in degrees
-            mpu.dmpGetQuaternion(&q, fifoBuffer);
-            mpu.dmpGetGravity(&gravity, &q);
-            mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
-            //Serial.print("ypr\t");
-            //Serial.print(ypr[0] * 180/M_PI);
-            //Serial.print("\t");
-            //Serial.print(ypr[1] * 180/M_PI);
-            //Serial.print("\t");
-            //Serial.println(ypr[2] * 180/M_PI);
-        #endif
-
-
-        // blink LED to indicate activity
-        //blinkState = !blinkState;
-        //digitalWrite(LED_PIN, blinkState);
-    }
-    //Serial.println(F("No overflow or interrupt"));
-    //Serial.println(i);
-    i++;
-}
-

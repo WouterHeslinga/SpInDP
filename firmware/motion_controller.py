@@ -38,7 +38,6 @@ class MotionController:
                 sleep(self.timeout)
                 servo_info_timer += self.timeout
 
-                self.setup_keyframes()
 
                 totalKeyframes = self.totalKeyframes
                 legs = self.legs
@@ -119,12 +118,14 @@ class MotionController:
                         self.animation = animations.idle
                         self.timeout = 0.5
                         self.totalKeyframes = -1
+                        self.setup_keyframes()
                         self.state = "idle"                 
                     elif new_state == "walk":
                         self.angle = int(new_state)
                         self.animation = animations.walk
                         self.timeout = 0.14
                         self.totalKeyframes = 4
+                        self.setup_keyframes()
                         self.state = "walk"
                     elif new_state == "clap":
                         self.angle = 0
