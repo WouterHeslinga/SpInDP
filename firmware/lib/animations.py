@@ -2,7 +2,7 @@ import leg2 as leg
 import math as math
 from time import sleep
 
-def balloon(keyframe, leg):
+def balloon(keyframe, leg, angle):
     stepWidth = 130
     
     # keyframe 0 is for setup
@@ -100,7 +100,7 @@ def rotate(keyframe, leg, direction = -1):
 def idle(keyframe,leg):
     # keyframe 0 is for setup
     if keyframe == 0:
-        leg.changePos(130,0,110, add=False)
+        leg.changePos(130,0,110, add=False, invertX=False)
 
 #poortje
 #leg.changePos(130,0,110, add=False)
@@ -124,7 +124,7 @@ def walk(keyframe, leg, angle):
     # keyframe 0 is for setup
     if keyframe == 0:
         # set legs to default position
-        leg.changePos(130,0,110, add=False, apply=False)
+        leg.changePos(130,0,110, add=False, apply=False, invertX=False)
 
         if leg.isEven():
             leg.changePos(startPosX - (stepWidthX / 2), startPosY - (stepWidthY / 2), startPosZ - 0, add=False)
@@ -167,11 +167,226 @@ def walk(keyframe, leg, angle):
 def fly(keyframe,leg):
     # keyframe 0 is for setup
     if keyframe == 0:
-        pass
+        leg.setAngles(512,512,512)
 
     elif keyframe == 1:
-        leg.setAngles(512,204,512)
+        leg.setAngles(512,819,538)
     elif keyframe == 2:
-        leg.setAngles(512,204,305)
+        leg.setAngles(512,819,380)
+        
+def dab(keyframe,leg,angle):
+    # keyframe 0 is for setup
+    if keyframe == 0:
+        leg.setAngles(512,512,512)
+        if leg.id == 3 or leg.id == 6:
+            leg.setAngles(406,678,345)
+        elif leg.id == 2 or leg.id == 5:
+            leg.setAngles(590,538,459)
+
+    elif keyframe == 1:
+        if leg.id == 1:
+            leg.setAngles(915,520,679)
+        elif leg.id == 4:
+            leg.setAngles(283,555,634)
+    elif keyframe == 2:
+        if leg.id == 1:
+            leg.setAngles(590,661,748)
+        elif leg.id == 4:
+            leg.setAngles(143,512,749)
+            
+def leftToRight(keyframe,leg):
+    # keyframe 0 is for setup
+    if keyframe == 0:
+        leg.setAngles(512,512,512)
+
+    elif keyframe == 1:
+        if leg.id == 1 or leg.id == 2 or leg.id == 3:
+            leg.setAngles(512,609,547)
+        elif leg.id == 4 or leg.id == 5 or leg.id == 6:
+            leg.setAngles(512,433,556)
+    elif keyframe == 2:
+        if leg.id == 1 or leg.id == 2 or leg.id == 3:
+            leg.setAngles(512,433,556)
+        elif leg.id == 4 or leg.id == 5 or leg.id == 6:
+            leg.setAngles(512,609,547)
+            
+def rightToLeft(keyframe,leg):
+    # keyframe 0 is for setup
+    if keyframe == 0:
+        leg.setAngles(512,512,512)
+
+    elif keyframe == 1:
+        if leg.id == 1 or leg.id == 2 or leg.id == 3:
+            leg.setAngles(512,433,556)
+        elif leg.id == 4 or leg.id == 5 or leg.id == 6:
+            leg.setAngles(512,609,547)
+    elif keyframe == 2:
+        if leg.id == 1 or leg.id == 2 or leg.id == 3:
+            leg.setAngles(512,609,547)
+        elif leg.id == 4 or leg.id == 5 or leg.id == 6:
+            leg.setAngles(512,433,556)
+
+def frontToBack(keyframe,leg):
+    # keyframe 0 is for setup
+    if keyframe == 0:
+        leg.setAngles(512,512,512)
+
+    elif keyframe == 1:
+        if leg.id == 1 or leg.id == 4:
+            leg.setAngles(512,775,257)
+        elif leg.id == 2 or leg.id == 5:
+            leg.setAngles(512,635,389)
+        elif leg.id == 3 or leg.id == 6:
+            leg.setAngles(512,459,565)
+    elif keyframe == 2:
+        if leg.id == 1 or leg.id == 4:
+            leg.setAngles(512,459,565)
+        elif leg.id == 2 or leg.id == 5:
+            leg.setAngles(512,635,389)
+        elif leg.id == 3 or leg.id == 6:
+            leg.setAngles(512,775,257)
+
+def backToFront(keyframe,leg):
+    # keyframe 0 is for setup
+    if keyframe == 0:
+        leg.setAngles(512,512,512)
+
+    elif keyframe == 1:
+        if leg.id == 1 or leg.id == 4:
+            leg.setAngles(512,459,565)
+        elif leg.id == 2 or leg.id == 5:
+            leg.setAngles(512,635,389)
+        elif leg.id == 3 or leg.id == 6:
+            leg.setAngles(512,775,257)
+    elif keyframe == 2:
+        if leg.id == 1 or leg.id == 4:
+            leg.setAngles(512,775,257)
+        elif leg.id == 2 or leg.id == 5:
+            leg.setAngles(512,635,389)
+        elif leg.id == 3 or leg.id == 6:
+            leg.setAngles(512,459,565)
+
+def downToUp(keyframe,leg):
+    # keyframe 0 is for setup
+    if keyframe == 0:
+        leg.setAngles(512,512,512)
+
+    elif keyframe == 1:
+        leg.setAngles(512,837,196)
+    elif keyframe == 2:
+        leg.setAngles(512,301,731)
+
+def upToDown(keyframe,leg):
+    # keyframe 0 is for setup
+    if keyframe == 0:
+        leg.setAngles(512,512,512)
+        
+    elif keyframe == 1:
+        leg.setAngles(512,301,731)
+    elif keyframe == 2:
+        leg.setAngles(512,837,196)
+
+def hipsToLeft(keyframe,leg):
+    # keyframe 0 is for setup
+    if keyframe == 0:
+        leg.setAngles(512,512,512)
+        
+    elif keyframe == 1:
+            leg.setAngles(397,512,512)
+    elif keyframe == 2:
+            leg.setAngles(608,837,196)
+
+
+
+def hipsToRight(keyframe,leg):
+    # keyframe 0 is for setup
+    if keyframe == 0:
+        leg.setAngles(512,512,512)
+        
+    elif keyframe == 1:
+            leg.setAngles(608,837,196)     
+    elif keyframe == 2:
+            leg.setAngles(397,512,512)
+            
+def wave(keyframe,leg):
+    # keyframe 0 is for setup
+    if keyframe == 0:
+        leg.setAngles(512,512,512)
+
+    elif keyframe == 1:
+        if leg.id == 1 or leg.id == 4:
+            leg.setAngles(512,459,565)
+        elif leg.id == 2 or leg.id == 5:
+            leg.setAngles(512,635,389)
+        elif leg.id == 3 or leg.id == 6:
+            leg.setAngles(512,775,257)
+    elif keyframe == 2:
+        leg.setAngles(512,459,565)
     elif keyframe == 3:
-        leg.setAngles(512, 204,512)
+        if leg.id == 1 or leg.id == 4:
+            leg.setAngles(512,775,257)
+        elif leg.id == 2 or leg.id == 5:
+            leg.setAngles(512,635,389)
+        elif leg.id == 3 or leg.id == 6:
+            leg.setAngles(512,459,565)
+    elif keyframe == 4:
+        leg.setAngles(512,775,257)
+        
+def waveInverse(keyframe,leg):
+    # keyframe 0 is for setup
+    if keyframe == 0:
+        leg.setAngles(512,512,512)
+
+    elif keyframe == 1:
+        if leg.id == 1 or leg.id == 4:
+            leg.setAngles(512,775,257)
+        elif leg.id == 2 or leg.id == 5:
+            leg.setAngles(512,635,389)
+        elif leg.id == 3 or leg.id == 6:
+            leg.setAngles(512,459,565)
+    elif keyframe == 2:
+        leg.setAngles(512,775,257)
+    elif keyframe == 3:
+        if leg.id == 1 or leg.id == 4:
+            leg.setAngles(512,459,565)
+        elif leg.id == 2 or leg.id == 5:
+            leg.setAngles(512,635,389)
+        elif leg.id == 3 or leg.id == 6:
+            leg.setAngles(512,775,257)
+    elif keyframe == 4:
+        leg.setAngles(512,459,565)
+
+def twerk(keyframe, leg, angle):
+    # keyframe 0 is for setup
+    if keyframe == 0:
+        leg.setAngles(512,512,512)
+        if leg.id == 1 or leg.id == 4:
+            leg.setAngles(512,775,257)
+        elif leg.id == 2 or leg.id == 5:
+            leg.setAngles(512,635,389)
+        elif leg.id == 3 or leg.id == 6:
+            leg.setAngles(512,459,565)
+            
+    elif keyframe == 1:
+        if leg.id == 3 or leg.id == 6:
+            leg.setAngles(512,635,389)         
+    elif keyframe == 2:
+        if leg.id == 3 or leg.id == 6:
+            leg.setAngles(512,459,565)
+
+def greet(keyframe,leg,angle):
+    # keyframe 0 is for setup
+    if keyframe == 0:
+        leg.setAngles(512,512,512)
+        if leg.id == 2:
+            leg.setAngles(696,512,512)
+        elif leg.id == 1:
+            leg.setAngles(722,714,767)
+
+    elif keyframe == 1:
+        if leg.id == 1:
+            leg.setAngles(916,714,688)
+
+    elif keyframe == 2:
+        if leg.id == 1:
+            leg.setAngles(722,714,767)

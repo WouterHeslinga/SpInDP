@@ -167,7 +167,7 @@ class Vision:
                     else: self.data = self.offset_center(frame, center)[0]
 
             
-        cv2.imshow('round shape', frame)
+        #cv2.imshow('round shape', frame)
     
     def offset_center(self, frame, center):
         shape = frame.shape
@@ -237,7 +237,7 @@ class Vision:
         while True:
             #Send values
             self.queue_main.put({'objectcoords': self.data})
-            self.event.wait(1)
+            self.event.wait(2)
     
     def release(self):
         self.vs.stop()

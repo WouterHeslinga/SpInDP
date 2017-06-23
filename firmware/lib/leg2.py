@@ -10,6 +10,7 @@ class Leg():
         self.knee = knee_servo
         self.foot = foot_servo
         self.id = id
+        self.xx = 0
         self.x = 0
         self.y = 0
         self.z = 0
@@ -21,10 +22,20 @@ class Leg():
         rollx = 0
         pitchy = 0
         yawz = 0
-        if add == True and invertX == True:
+
+        #remember last set X position, needed to walk sideways when forcing values with add=False
+        if add == False and invertX == False:
+            self.xx = x
+
+        #invert x to properly walk sideways
+        if invertX == True:
             if self.id == 1 or self.id == 2 or self.id == 3:
-                x *= -1
-            
+                if add == False:
+                    x = self.xx + (self.xx - x)
+                else:
+                    x *= -1
+
+        #add values else set them
         if add:
             self.x += x
             self.y += y
@@ -41,13 +52,14 @@ class Leg():
         if offset and (self.id != 2 and self.id != 5):
             degrees[0] += (-153 if (self.id == 1 or self.id == 4) else 153)
         
+        # if true then move the according servo's
         if apply:
             self.moveHip(int(degrees[0]), speed)
-            sleep(0.001)
+            sleep(0.002)
             self.moveKnee(int(degrees[1]), speed)
-            sleep(0.001)
+            sleep(0.002)
             self.moveFoot(int(degrees[2]), speed)
-            sleep(0.001)
+            sleep(0.002)
 
     def setAngles(self, coxa, femur, tibia, speed = -1, offset=True):
         degrees = [coxa, femur, tibia]
@@ -57,11 +69,11 @@ class Leg():
             degrees[0] += (-153 if (self.id == 1 or self.id == 4) else 153)
 
         self.moveHip(int(degrees[0]), speed)
-        sleep(0.001)
+        sleep(0.002)
         self.moveKnee(int(degrees[1]), speed)
-        sleep(0.001)
+        sleep(0.002)
         self.moveFoot(int(degrees[2]), speed)
-        sleep(0.001)
+        sleep(0.002)
 
                 
     def moveHip(self, rotation, speed = -1):

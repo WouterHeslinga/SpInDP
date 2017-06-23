@@ -35,7 +35,6 @@ class MotionController:
                 sleep(self.timeout)
                 servo_info_timer += self.timeout
 
-
                 totalKeyframes = self.totalKeyframes
                 legs = self.legs
 
@@ -51,6 +50,8 @@ class MotionController:
                 else:
                     while state == self.state:
                         for leg in legs:
+                            #if leg.id == 1:
+                            #    print("playing animation (leg1): %d" % (self.keyframeUneven))
                             if leg.isEven:
                                 animation(self.keyframeEven, leg, angle=self.angle)
                             else:
@@ -102,40 +103,62 @@ class MotionController:
                 print(command)
                 if 'motion_state' in command:
                     new_state = command["motion_state"]
-                    if self.state == new_state:
-                        try:
-                            angleValue = int(new_state)
-                            self.angle = angleValue
-                            # set legs to start position
-                            #for leg in self.legs:
-                            #    self.animation(0, leg, angle=self.angle)
-                        except:
-                            pass
+                    if new_state == None:
                         continue
 
-                    if new_state == "idle":
-                        self.angle = 0
-                        self.animation = animations.idle
-                        self.timeout = 0.5
-                        self.totalKeyframes = -1
-                        self.setup_keyframes()
-                        self.state = "idle"                 
-                    elif new_state == "walk":
-                        self.angle = int(new_state)
-                        self.animation = animations.walk
-                        # set legs to start position
-                        for leg in self.legs:
-                            self.animation(0, leg, angle=self.angle)
-                        self.timeout = 0.14
-                        self.totalKeyframes = 4
-                        self.setup_keyframes()
-                        self.state = "walk"
-                    elif new_state == "clap":
-                        self.angle = 0
-                        self.animation = animations.balloon
-                        self.timeout = .5
-                        self.totalKeyframes = -1
-                        self.state = "clap"
+                    # try to get an angle value and expect the walk state, else expect a different state
+                    try:
+                        angleValue = int(new_state)
+                        # update current walk state with new angle
+                        if self.state == "walk":
+                            if angleValue - self.angle > 5 and angleValue - self.angle < -5:
+                                continue
+                                    
+                            self.angle = angleValue
+                        # activate walk state   
+                        else:
+                            self.angle = int(new_state)
+                            self.animation = animations.walk
+                            # set legs to start position
+                            for leg in self.legs:
+                                self.animation(0, leg, angle=self.angle)
+                            self.timeout = 0.18
+                            self.totalKeyframes = 4
+                            self.setup_keyframes()
+                            self.state = "walk"
+                    except:
+                        if new_state == "idle":
+                            self.angle = 0
+                            self.animation = animations.idle
+                            self.timeout = 0.5
+                            self.totalKeyframes = -1
+                            self.setup_keyframes()
+                            self.state = "idle"  
+                        elif new_state == "clap":
+                            self.angle = 0
+                            self.animation = animations.balloon
+                            self.timeout = .5
+                            self.totalKeyframes = 3
+                            self.state = "clap"  
+                        elif new_state == "twerk":
+                            self.angle = 0
+                            self.animation = animations.twerk
+                            self.timeout = .3
+                            self.totalKeyframes = 2
+                            self.state = "twerk"  
+                        elif new_state == "greet":
+                            self.angle = 0
+                            self.animation = animations.greet
+                            self.timeout = .3
+                            self.totalKeyframes = 2
+                            self.state = "greet"  
+                        elif new_state == "dab":
+                            self.angle = 0
+                            self.animation = animations.dab
+                            self.timeout = .3
+                            self.totalKeyframes = 2
+                            self.state = "dab"  
+
 
             self.event.wait(.1)   
     

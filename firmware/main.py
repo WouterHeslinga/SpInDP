@@ -48,16 +48,17 @@ if __name__ == '__main__':
     bluetooth = BluetoothServer(queue_bluetooth, queue_main, 1)
 
     # Create the workers
-    workers.append(multiprocessing.Process(target=vision_worker, args=(queue_vision, queue_main)))
+    #workers.append(multiprocessing.Process(target=vision_worker, args=(queue_vision, queue_main)))
     # workers.append(multiprocessing.Process(target=web_worker, args=(queue_vision_web,)))
     workers.append(multiprocessing.Process(target=motion_controller_worker, args=(queue_motion, queue_main)))
-    workers.append(multiprocessing.Process(target=bluetooth_server_worker, args=(bluetooth,)))
+    # workers.append(multiprocessing.Process(target=bluetooth_server_worker, args=(bluetooth,)))
 
     # Start the workers
     for worker in workers:
         worker.start()
 
-    while should_run:   
+    while should_run:
+        break
         event.wait(.5)
         if not queue_main.empty():
             commands = queue_main.get()
@@ -69,13 +70,14 @@ if __name__ == '__main__':
     try:
         while should_run:   
             queue_main.put({'motion_state': raw_input("direction: ")})
-            sleep(0.1)
+            sleep(0.05)
             if not queue_main.empty():
                 commands = queue_main.get()
                 if 'servo_info' in commands:
                     queue_bluetooth.put({'servo_info': commands['servo_info']})
                 elif 'motion_state' in commands:
                     queue_motion.put({'motion_state': commands['motion_state']})
+
 
     except KeyboardInterrupt:
         print('closing bluetooth')
