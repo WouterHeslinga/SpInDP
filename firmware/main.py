@@ -57,26 +57,25 @@ if __name__ == '__main__':
     for worker in workers:
         worker.start()
 
-    while should_run:
-        break
-        event.wait(.5)
-        if not queue_main.empty():
-            commands = queue_main.get()
-            if 'temps' in commands:
-                print(commands['temps'])
-            if 'objectcoords' in commands:
-                queue_motion.put({'motion_state': commands['objectcoords']})
-
     try:
         while should_run:   
-            queue_main.put({'motion_state': raw_input("direction: ")})
+            #queue_main.put({'motion_state': raw_input("direction: ")})
+            #queue_main.put({'motion_command': raw_input("command: ")})
             sleep(0.05)
             if not queue_main.empty():
                 commands = queue_main.get()
                 if 'servo_info' in commands:
                     queue_bluetooth.put({'servo_info': commands['servo_info']})
+
+                elif 'motion_command' in commands:
+                    queue_motion.put({'motion_command': commands['motion_command']})
                 elif 'motion_state' in commands:
                     queue_motion.put({'motion_state': commands['motion_state']})
+                elif 'objectcoords' in commands:
+                    queue_motion.put({'motion_state': commands['objectcoords']})
+
+                elif 'temps' in commands:
+                    print(commands['temps'])
 
 
     except KeyboardInterrupt:

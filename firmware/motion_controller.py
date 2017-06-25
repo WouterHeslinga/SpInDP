@@ -17,6 +17,7 @@ class MotionController:
         self.event = threading.Event()
 
         self.angle = 0
+        self.bodyHeight = 100
         self.animation = animations.idle
         self.timeout = 0.5
         self.totalKeyframes = -1
@@ -99,9 +100,33 @@ class MotionController:
     def queue_worker(self):
         while self.should_run:
             if not self.queue.empty():
+                # process command
                 command = self.queue.get()
                 print(command)
-                if 'motion_state' in command:
+
+                # motion commands are for changing specific variables (height, yaw, pitch etc.)
+                # example: 'height:100'
+                if 'motion_command' in command:
+                    new_command = command['motion_command']
+                    if new_command == None:
+                        continue
+
+                    # try to get a valid value
+                    try:
+                        seperator = new_command.index(":")
+                        new_value = int(new_command[seperator + 1:])
+                        new_command = new_command[:seperator]
+
+                        if new_command == "height":
+                            self.bodyHeight = new_value
+
+                    except:
+                        print("Invalid motion_command")
+
+
+                # motion states are for changing the movement animation
+                # example: '0', '90', 'idle'
+                elif 'motion_state' in command:
                     new_state = command["motion_state"]
                     if new_state == None:
                         continue
