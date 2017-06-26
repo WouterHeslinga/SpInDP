@@ -1,18 +1,26 @@
-import leg2 as leg
+import leg as leg
 import math as math
 from time import sleep
 
-def balloon(keyframe, leg, angle):
+def balloon(keyframe, leg, statusValues):
     stepWidth = 130
+
+    startPos = [statusValues[2], 0, statusValues[3]]
+    startPosX = startPos[0]
+    startPosY = startPos[1]
+    startPosZ = startPos[2]
     
     # keyframe 0 is for setup
     if keyframe == 0:
+        # set legs to default position
+        leg.changePos(startPosX, startPosY, startPosZ, add=False, apply=False, invertX=False)
+
         if leg.id == 3 or leg.id == 6:
-            leg.changePos(0, stepWidth /2, 60, invertX=False)
+            leg.changePos(startPosX + 0, startPosY + (stepWidth / 2), startPosZ, add=False)
         elif leg.id == 2 or leg.id == 5:
-            leg.changePos(0, -stepWidth, 0, invertX=False)
+            leg.changePos(startPosX + 0, startPosY - stepWidth, startPosZ + 60, add=False)
         elif leg.id == 1 or leg.id == 4:
-            leg.changePos(0, -stepWidth / 2, 0, invertX=False)
+            leg.changePos(startPosX + 0, startPosY - (stepWidth / 2), startPosZ + 0, add=False)
 
     if keyframe == 1:
         if leg.id == 1 or leg.id == 4:
@@ -26,81 +34,89 @@ def balloon(keyframe, leg, angle):
         if leg.id == 1 or leg.id == 4:
             leg.changePos(50, stepWidth / 1.3, -200, offset=False)
 
-def rotate(keyframe, leg, direction = -1):
-    stepWidth = 54
-    stepHeight = 30
+def rotate(keyframe, leg, statusValues):
+    stepWidth = 138
+    stepHeight = 30 *-1
+    
+    if statusValues[1] == "right":
+        stepWidth *= -1
+
+    startPos = [statusValues[2], 0, statusValues[3]]
+    startPosX = startPos[0]
+    startPosY = startPos[1]
+    startPosZ = startPos[2]
 
     offset = False
 
     if keyframe == 0:
         if leg.id == 2:
-            leg.changePos(0, -stepWidth / 2, 0, offset=False)
+            leg.changePos(startPosX, startPosY - (stepWidth / 2), startPosZ, add=False, apply=False, invertX=False, offset=False)
             
         elif leg.id == 4 or leg.id == 6:
-            leg.changePos(0, stepWidth / 2, 0, offset=False)
+            leg.changePos(startPosX, startPosY + (stepWidth / 2), startPosZ, add=False, apply=False, invertX=False, offset=False)
             
         elif leg.id == 1 or leg.id == 3:
-            leg.changePos(0, -stepWidth / 2, 0, offset=False)
+            leg.changePos(startPosX, startPosY - (stepWidth / 2), startPosZ, add=False, apply=False, invertX=False, offset=False)
             
         elif leg.id == 5:
-            leg.changePos(0, stepWidth / 2, 0, offset=False)
+            leg.changePos(startPosX, startPosY + (stepWidth / 2), startPosZ, add=False, apply=False, invertX=False, offset=False)
 
     elif keyframe == 1:
         if leg.id == 2:
-            leg.changePos(0, stepWidth / 2, 0, offset=False)
-            
+            leg.changePos(startPosX, startPosY, startPosZ, add=False, offset=False)
+
         elif leg.id == 4 or leg.id == 6:
-            leg.changePos(0, -stepWidth / 2, 0, offset=False)
+            leg.changePos(startPosX, startPosY, startPosZ, add=False, offset=False)
             
         elif leg.id == 1 or leg.id == 3:
-            leg.changePos(0, -stepWidth, stepHeight, offset=False)
+            leg.changePos(startPosX, startPosY - (stepWidth / 2), startPosZ + stepHeight, add=False, offset=False)
             
         elif leg.id == 5:
-            leg.changePos(0, stepWidth, stepHeight, offset=False)
+            leg.changePos(startPosX, startPosY + (stepWidth / 2), startPosZ + stepHeight, add=False, offset=False)
             
     elif keyframe == 2:
         if leg.id == 2:
-            leg.changePos(0, stepWidth / 2, 0, offset=False)
+            leg.changePos(startPosX, startPosY + (stepWidth / 2), startPosZ, add=False, offset=False)
             
         elif leg.id == 4 or leg.id == 6:
-            leg.changePos(0, -stepWidth / 2, 0, offset=False)
+            leg.changePos(startPosX, startPosY - (stepWidth / 2), startPosZ, add=False, offset=False)
             
         elif leg.id == 1 or leg.id == 3:
-            leg.changePos(0, 0, -stepHeight, offset=False)
+            leg.changePos(startPosX, startPosY - (stepWidth / 2), startPosZ, add=False, offset=False)
             
         elif leg.id == 5:
-            leg.changePos(0, 0, -stepHeight, offset=False)
+            leg.changePos(startPosX, startPosY + (stepWidth / 2), startPosZ, add=False, offset=False)
 
     elif keyframe == 3:
         if leg.id == 2:
-            leg.changePos(0, -stepWidth, stepHeight)
+            leg.changePos(startPosX, startPosY - (stepWidth / 2), startPosZ + stepHeight, add=False, offset=False)
             
         elif leg.id == 4 or leg.id == 6:
-            leg.changePos(0, stepWidth, stepHeight, offset=False)
+            leg.changePos(startPosX, startPosY + (stepWidth / 2), startPosZ + stepHeight, add=False, offset=False)
             
         elif leg.id == 1 or leg.id == 3:
-            leg.changePos(0, stepWidth / 2, 0, offset=False)
+            leg.changePos(startPosX, startPosY, startPosZ, add=False, offset=False)
             
         elif leg.id == 5:
-            leg.changePos(0, -stepWidth / 2, 0, offset=False)
+            leg.changePos(startPosX, startPosY, startPosZ, add=False, offset=False)
 
     elif keyframe == 4:
         if leg.id == 2:
-            leg.changePos(0, 0, -stepHeight, offset=False)
+            leg.changePos(startPosX, startPosY - (stepWidth / 2), startPosZ, add=False, offset=False)
             
         elif leg.id == 4 or leg.id == 6:
-            leg.changePos(0, 0, -stepHeight, offset=False)
+            leg.changePos(startPosX, startPosY + (stepWidth / 2), startPosZ, add=False, offset=False)
             
         elif leg.id == 1 or leg.id == 3:
-            leg.changePos(0, stepWidth / 2, 0, offset=False)
+            leg.changePos(startPosX, startPosY - (stepWidth / 2), startPosZ, add=False, offset=False)
             
         elif leg.id == 5:
-            leg.changePos(0, -stepWidth / 2, 0, offset=False)
+            leg.changePos(startPosX, startPosY + (stepWidth / 2), startPosZ, add=False, offset=False)
             
-def idle(keyframe,leg):
+def idle(keyframe, leg, statusValues):
     # keyframe 0 is for setup
     if keyframe == 0:
-        leg.changePos(130,0,110, add=False, invertX=False)
+        leg.changePos(statusValues[2], 0, statusValues[3], add=False, invertX=False)
 
 #poortje
 #leg.changePos(130,0,110, add=False)
@@ -109,14 +125,26 @@ def idle(keyframe,leg):
 #leg.changePos(130,0,150, add=False)
     
 
-def walk(keyframe, leg, angle):
-    stepWidth = 70  
+def walk(keyframe, leg, statusValues):
+    stepWidth = 70
+    isWalking = True
+
+    if statusValues[1] == "left":
+        isWalking = False
+        if leg.id == 1 or leg.id == 2 or leg.id == 3:
+            stepWidth *= -2
+    elif statusValues[1] == "right":
+        isWalking = False
+        if leg.id == 4 or leg.id == 5 or leg.id == 6:
+            stepWidth *= -2
+
     stepHeight = 60 *-1
     radfactor = math.pi / 180
-    stepWidthY = stepWidth * math.cos(angle * radfactor)
-    stepWidthX = stepWidth * math.sin(angle * radfactor)
+    stepWidthY = stepWidth * math.cos(statusValues[0] * radfactor)
+    stepWidthX = stepWidth * math.sin(statusValues[0] * radfactor)
 
-    startPos = [130,0,110]
+    
+    startPos = [statusValues[2], 0, statusValues[3]]
     startPosX = startPos[0]
     startPosY = startPos[1]
     startPosZ = startPos[2]
@@ -124,47 +152,39 @@ def walk(keyframe, leg, angle):
     # keyframe 0 is for setup
     if keyframe == 0:
         # set legs to default position
-        leg.changePos(130,0,110, add=False, apply=False, invertX=False)
+        leg.changePos(startPosX, startPosY, startPosZ, add=False, apply=False, invertX=False, offset=isWalking)
 
         if leg.isEven():
-            leg.changePos(startPosX - (stepWidthX / 2), startPosY - (stepWidthY / 2), startPosZ - 0, add=False)
+            leg.changePos(startPosX - (stepWidthX / 2), startPosY - (stepWidthY / 2), startPosZ - 0, add=False, offset=isWalking)
             
         else:
-            leg.changePos(startPosX + (stepWidthX / 2), startPosY + (stepWidthY / 2), startPosZ + 0, add=False)
+            leg.changePos(startPosX + (stepWidthX / 2), startPosY + (stepWidthY / 2), startPosZ + 0, add=False, offset=isWalking)
         
     elif keyframe == 1:
         if leg.isEven():
-            #leg.changePos(stepWidthX / 2, stepWidthY / 2, 0)
-            leg.changePos(startPosX, startPosY, startPosZ, add=False)
+            leg.changePos(startPosX, startPosY, startPosZ, add=False, offset=isWalking)
         else:
-            #leg.changePos(-stepWidthX / 2, -stepWidthY / 2, stepHeight)
-            leg.changePos(startPosX, startPosY, startPosZ + stepHeight, add=False)
+            leg.changePos(startPosX, startPosY, startPosZ + stepHeight, add=False, offset=isWalking)
         
     elif keyframe == 2:
         if leg.isEven():
-            #leg.changePos(stepWidthX / 2, stepWidthY / 2, 0)
-            leg.changePos(startPosX + (stepWidthX / 2), startPosY + (stepWidthY / 2), startPosZ, add=False)
+            leg.changePos(startPosX + (stepWidthX / 2), startPosY + (stepWidthY / 2), startPosZ, add=False, offset=isWalking)
         else:
-            #leg.changePos(-stepWidthX / 2, -stepWidthY / 2, -stepHeight)
-            leg.changePos(startPosX - (stepWidthX / 2), startPosY - (stepWidthY / 2), startPosZ, add=False)
+            leg.changePos(startPosX - (stepWidthX / 2), startPosY - (stepWidthY / 2), startPosZ, add=False, offset=isWalking)
         
     elif keyframe == 3:
         if leg.isEven():
-            #leg.changePos(-stepWidthX / 2, -stepWidthY / 2, stepHeight)
-            leg.changePos(startPosX, startPosY, startPosZ + stepHeight, add=False)
+            leg.changePos(startPosX, startPosY, startPosZ + stepHeight, add=False, offset=isWalking)
         else:
-            #leg.changePos(stepWidthX / 2, stepWidthY / 2, 0)
-            leg.changePos(startPosX, startPosY, startPosZ, add=False)
+            leg.changePos(startPosX, startPosY, startPosZ, add=False, offset=isWalking)
         
     elif keyframe == 4:
         if leg.isEven():
-            #leg.changePos(-stepWidthX / 2, -stepWidthY / 2, -stepHeight)
-            leg.changePos(startPosX - (stepWidthX / 2), startPosY - (stepWidthY / 2), startPosZ, add=False)
+            leg.changePos(startPosX - (stepWidthX / 2), startPosY - (stepWidthY / 2), startPosZ, add=False, offset=isWalking)
         else:
-            #leg.changePos(stepWidthX / 2, stepWidthY / 2, 0)
-            leg.changePos(startPosX + (stepWidthX / 2), startPosY + (stepWidthY / 2), startPosZ, add=False)
+            leg.changePos(startPosX + (stepWidthX / 2), startPosY + (stepWidthY / 2), startPosZ, add=False, offset=isWalking)
 
-def fly(keyframe,leg):
+def fly(keyframe,leg, statusValues):
     # keyframe 0 is for setup
     if keyframe == 0:
         leg.setAngles(512,512,512)
@@ -174,7 +194,7 @@ def fly(keyframe,leg):
     elif keyframe == 2:
         leg.setAngles(512,819,380)
         
-def dab(keyframe,leg,angle):
+def dab(keyframe, leg, statusValues):
     # keyframe 0 is for setup
     if keyframe == 0:
         leg.setAngles(512,512,512)
@@ -194,7 +214,7 @@ def dab(keyframe,leg,angle):
         elif leg.id == 4:
             leg.setAngles(143,512,749)
             
-def leftToRight(keyframe,leg):
+def leftToRight(keyframe, leg, statusValues):
     # keyframe 0 is for setup
     if keyframe == 0:
         leg.setAngles(512,512,512)
@@ -210,7 +230,7 @@ def leftToRight(keyframe,leg):
         elif leg.id == 4 or leg.id == 5 or leg.id == 6:
             leg.setAngles(512,609,547)
             
-def rightToLeft(keyframe,leg):
+def rightToLeft(keyframe, leg, statusValues):
     # keyframe 0 is for setup
     if keyframe == 0:
         leg.setAngles(512,512,512)
@@ -226,7 +246,7 @@ def rightToLeft(keyframe,leg):
         elif leg.id == 4 or leg.id == 5 or leg.id == 6:
             leg.setAngles(512,433,556)
 
-def frontToBack(keyframe,leg):
+def frontToBack(keyframe, leg, statusValues):
     # keyframe 0 is for setup
     if keyframe == 0:
         leg.setAngles(512,512,512)
@@ -246,7 +266,7 @@ def frontToBack(keyframe,leg):
         elif leg.id == 3 or leg.id == 6:
             leg.setAngles(512,775,257)
 
-def backToFront(keyframe,leg):
+def backToFront(keyframe, leg, statusValues):
     # keyframe 0 is for setup
     if keyframe == 0:
         leg.setAngles(512,512,512)
@@ -266,7 +286,7 @@ def backToFront(keyframe,leg):
         elif leg.id == 3 or leg.id == 6:
             leg.setAngles(512,459,565)
 
-def downToUp(keyframe,leg):
+def downToUp(keyframe, leg, statusValues):
     # keyframe 0 is for setup
     if keyframe == 0:
         leg.setAngles(512,512,512)
@@ -276,7 +296,7 @@ def downToUp(keyframe,leg):
     elif keyframe == 2:
         leg.setAngles(512,301,731)
 
-def upToDown(keyframe,leg):
+def upToDown(keyframe, leg, statusValues):
     # keyframe 0 is for setup
     if keyframe == 0:
         leg.setAngles(512,512,512)
@@ -286,7 +306,7 @@ def upToDown(keyframe,leg):
     elif keyframe == 2:
         leg.setAngles(512,837,196)
 
-def hipsToLeft(keyframe,leg):
+def hipsToLeft(keyframe, leg, statusValues):
     # keyframe 0 is for setup
     if keyframe == 0:
         leg.setAngles(512,512,512)
@@ -298,7 +318,7 @@ def hipsToLeft(keyframe,leg):
 
 
 
-def hipsToRight(keyframe,leg):
+def hipsToRight(keyframe, leg, statusValues):
     # keyframe 0 is for setup
     if keyframe == 0:
         leg.setAngles(512,512,512)
@@ -308,7 +328,7 @@ def hipsToRight(keyframe,leg):
     elif keyframe == 2:
             leg.setAngles(397,512,512)
             
-def wave(keyframe,leg):
+def wave(keyframe, leg, statusValues):
     # keyframe 0 is for setup
     if keyframe == 0:
         leg.setAngles(512,512,512)
@@ -332,7 +352,7 @@ def wave(keyframe,leg):
     elif keyframe == 4:
         leg.setAngles(512,775,257)
         
-def waveInverse(keyframe,leg):
+def waveInverse(keyframe, leg, statusValues):
     # keyframe 0 is for setup
     if keyframe == 0:
         leg.setAngles(512,512,512)
@@ -356,7 +376,7 @@ def waveInverse(keyframe,leg):
     elif keyframe == 4:
         leg.setAngles(512,459,565)
 
-def twerk(keyframe, leg, angle):
+def twerk(keyframe, leg, statusValues):
     # keyframe 0 is for setup
     if keyframe == 0:
         leg.setAngles(512,512,512)
@@ -374,7 +394,7 @@ def twerk(keyframe, leg, angle):
         if leg.id == 3 or leg.id == 6:
             leg.setAngles(512,459,565)
 
-def greet(keyframe,leg,angle):
+def greet(keyframe, leg, statusValues):
     # keyframe 0 is for setup
     if keyframe == 0:
         leg.setAngles(512,512,512)
