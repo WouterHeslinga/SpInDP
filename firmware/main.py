@@ -58,13 +58,15 @@ if __name__ == '__main__':
         worker.start()
 
     while should_run:   
-        event.wait(.5)
+        event.wait(1)
         if not queue_main.empty():
             commands = queue_main.get()
             if 'temps' in commands:
                 print(commands['temps'])
             if 'objectcoords' in commands:
                 queue_motion.put({'motion_state': commands['objectcoords']})
+            if 'egg' in commands:
+                queue_motion.put({'egg': commands['objectcoords']})
 
     try:
         while should_run:   

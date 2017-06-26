@@ -15,14 +15,8 @@ class Vision:
     """Vision Class"""
     def __init__(self, queue, queue_main):
         self.vs = PiVideoStream().start()
-		
-		#Warmup camera
-        sleep(.2)
-
-		GPIO.setmode(GPIO.BCM)
-		GPIO.setup(21, GPIO.OUT)
-		self.pwm = GPIO.PWM(21, 100)
-		self.pwm.start(5)
+        self.pwm = GPIO.PWM(21, 100)
+        self.pwm.start(5)
         self.queue = queue
         self.queue_main = queue_main      
         self.status = False
@@ -39,15 +33,31 @@ class Vision:
 
 		#Settings
 		self.method = "cards"
-		self.symbol_white_egg = "club"
-		self.symbol_brown_egg = "diamond"
+        self.symbol_white_egg = None
+		self.symbol_brown_egg = None
 		self.show_feed = False
+
+        if not self.queue.empty():
+            command = self.queue.get()
+            print(command)
+            if 'egg' in command:
+                tempsymbols = command.split(',')
+                self.symbol_brown_egg = tempsymbols[0]
+                self.symbol_white_egg = tempsymbols[1]
+            else:
+                print("We didnt get an egg command")
 
         #Variables for finding objects
         self.balloonRadius = 100
         self.eggRadius = 35
         self.shapeArea = 1000
-        
+
+        #egg beak
+		GPIO.setmode(GPIO.BCM)
+		GPIO.setup(21, GPIO.OUT)
+        #Warmup camera
+        sleep(.2)        
+         
 
     def update(self):
         """Process one frame"""       
@@ -136,6 +146,7 @@ class Vision:
             pass
 
         if radius > 10:
+            print("Found a contour with a radius larger than 10")
             cv2.circle(frame, (int(x), int(y)), int(radius), (0, 255, 255), 2)
             cv2.circle(frame, center, 5, (0, 0, 255), -1)                
             color = (255,255,255)
@@ -149,6 +160,13 @@ class Vision:
             
             #Egg module
             elif (self.method == "brownegg" or "whiteegg"):
+
+                #Debug info
+                if self.method == "brownegg":
+                    print("Currently looking for brown egg")
+                elif self.method == "whiteegg":
+                    print("Currently looking for white egg")
+
                 if radius > self.eggRadius:
                     self.data = "lowrider"
                     #wait some time for the spider to lower its body?
@@ -157,13 +175,13 @@ class Vision:
                     if self.method == "brownegg":
                         self.found_brown_egg = True
                         self.object_to_find = self.symbol_brown_egg
-                        print("Found brown egg, now searching for %s" % self.object_to_find)          
+                        print("Found brown egg, now searching for %s" % self.symbol_brown_egg)          
                         self.method = "cards"
 
                     elif self.method == "whiteegg":
                         self.found_white_egg = True
-                        self.object_to_find = self.symbol_white_egg
-                        print("Found white egg, now searching for %s " % self.object_to_find)                           
+                        self.object_to_find = self.symbol_brown_egg
+                        print("Found white egg, now searching for %s " % self.symbol_white_egg)                           
                         self.method = "cards"
                 else:
                     self.data = self.offset_center(frame, center)[0]
@@ -242,7 +260,7 @@ class Vision:
     def send_data(self):
         while True:
             #Send values
-            self.queue_main.put({'objectcoords': self.data})
+            self.queue_main.put({'objectcoords': (int)self.data})
             self.event.wait(1)
     
     def release(self):
