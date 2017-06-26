@@ -20,7 +20,7 @@ class MotionController:
         self.angle = 0
         self.rotateDirection = "None"
         self.spanWidth = 130
-        self.bodyHeight = 100
+        self.bodyHeight = 119
         self.rollx = 0
         self.pitchy = 0
         self.yawz = 0
@@ -69,7 +69,15 @@ class MotionController:
                         sleep(self.timeout/3)
                         self.play_animation(self.keyframeEven, legs[2])
                         self.play_animation(self.keyframeUneven, legs[5])"""
-                                
+                        
+                        """"self.play_animation(self.keyframeUneven, legs[3])
+                        self.play_animation(self.keyframeEven, legs[0])
+                        self.play_animation(self.keyframeEven, legs[4])
+                        self.play_animation(self.keyframeEven, legs[1])
+                        self.play_animation(self.keyframeUneven, legs[5])
+                        self.play_animation(self.keyframeUneven, legs[2])
+
+                        """
                         for leg in legs:
                             if leg.isEven:
                                 self.play_animation(self.keyframeEven, leg)
@@ -118,7 +126,6 @@ class MotionController:
             if not self.queue.empty():
                 # process command
                 command = self.queue.get()
-
                 # motion commands are for changing specific variables (height, angle, yaw, pitch etc.)
                 # example: 'height:100'
                 if 'motion_command' in command:
@@ -128,7 +135,7 @@ class MotionController:
 
                     # try to get a valid value
                     try:
-                        seperator = new_command.index(":")
+                        seperator = new_command.index(",")
                         new_value = int(new_command[seperator + 1:])
                         new_command = new_command[:seperator]
 
@@ -154,8 +161,8 @@ class MotionController:
                         angleValue = int(new_state)
                         # update current walk state with new angle
                         if self.state == "walk":
-                            #if angleValue - self.angle > 5 and angleValue - self.angle < -5:
-                            #    continue
+                            if angleValue - self.angle > -5 and angleValue - self.angle < 5:
+                                continue
                             self.angle = angleValue
 
                         # activate walk state   
@@ -163,13 +170,12 @@ class MotionController:
                             self.angle = int(new_state)
                             self.rotateDirection = "none"
                             self.animation = animations.walk
-                            self.timeout = 0.1
+                            self.timeout = 0.18
                             self.totalKeyframes = 4
                             self.setup_keyframes()
                             self.state = str(new_state)
                     except:
                         if new_state == "idle":
-                            print("switching to idle")
                             self.angle = 0
                             self.animation = animations.idle
                             self.timeout = 0.5
@@ -178,21 +184,19 @@ class MotionController:
                             self.state = str(new_state)
 
                         elif new_state == "rotate_left":
-                            print("switching to left")
                             self.angle = 0
                             self.rotateDirection = "left"
                             self.animation = animations.walk
-                            self.timeout = 0.2
+                            self.timeout = 0.15
                             self.totalKeyframes = 4
                             self.setup_keyframes()
                             self.state = str(new_state)
 
                         elif new_state == "rotate_right":
-                            print("switching to right")
                             self.angle = 0
                             self.rotateDirection = "right"
                             self.animation = animations.walk
-                            self.timeout = 0.2
+                            self.timeout = 0.15
                             self.totalKeyframes = 4
                             self.setup_keyframes()
                             self.state = str(new_state)

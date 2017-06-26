@@ -129,16 +129,16 @@ def walk(keyframe, leg, statusValues):
     stepWidth = 70
     isWalking = True
 
-    if statusValues[1] == "left":
+    if statusValues[1] == "right":
         isWalking = False
         if leg.id == 1 or leg.id == 2 or leg.id == 3:
             stepWidth *= -2
-    elif statusValues[1] == "right":
-        isWalking = False
+    elif statusValues[1] == "left":
+        isWalking = False   
         if leg.id == 4 or leg.id == 5 or leg.id == 6:
             stepWidth *= -2
 
-    stepHeight = 60 *-1
+    stepHeight = 100 *-1
     radfactor = math.pi / 180
     stepWidthY = stepWidth * math.cos(statusValues[0] * radfactor)
     stepWidthX = stepWidth * math.sin(statusValues[0] * radfactor)
