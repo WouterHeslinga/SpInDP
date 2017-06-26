@@ -8,20 +8,26 @@ from picamera import PiCamera
 from time import sleep
 import threading
 import motion_controller
+import RPi.GPIO as GPIO
+
 
 class Vision:
     """Vision Class"""
-    def __init__(self, show_feed, queue, queue_main, method, symbolarray = None):
+    def __init__(self, queue, queue_main):
         self.vs = PiVideoStream().start()
+		
+		#Warmup camera
         sleep(.2)
+
+		GPIO.setmode(GPIO.BCM)
+		GPIO.setup(21, GPIO.OUT)
+		self.pwm = GPIO.PWM(21, 100)
+		self.pwm.start(5)
         self.queue = queue
-        self.queue_main = queue_main
-        self.show_feed = show_feed
-        self.method = method
+        self.queue_main = queue_main      
         self.status = False
         self.shapes = ['club', 'diamond', 'heart', 'spade']
         self.shape_contours = self.get_reference_shapes_contours()
-        self.symbolarray = symbolarray
         self.found_white_egg = False
         self.found_brown_egg = False
         self.event = threading.Event()
@@ -31,6 +37,12 @@ class Vision:
         self.send_data_worker = threading.Thread(target=self.send_data)
         self.send_data_worker.start()
 
+		#Settings
+		self.method = "cards"
+		self.symbol_white_egg = "club"
+		self.symbol_brown_egg = "diamond"
+		self.show_feed = False
+
         #Variables for finding objects
         self.balloonRadius = 100
         self.eggRadius = 35
@@ -38,10 +50,10 @@ class Vision:
         
 
     def update(self):
-        """Process one frame"""        
+        """Process one frame"""       
         frame = self.vs.read()
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-
+		
         if self.method == "cards":
             # Detect the shapes
             if self.object_to_find == "heart":
@@ -63,6 +75,7 @@ class Vision:
         self.queue.put(self.status)
         cv2.waitKey(10)
 
+    
     # New method
     def process_shape(self, hsv, frame):
         #find the proper contours
@@ -143,13 +156,13 @@ class Vision:
 
                     if self.method == "brownegg":
                         self.found_brown_egg = True
-                        self.object_to_find = self.symbolarray[0]
+                        self.object_to_find = self.symbol_brown_egg
                         print("Found brown egg, now searching for %s" % self.object_to_find)          
                         self.method = "cards"
 
                     elif self.method == "whiteegg":
                         self.found_white_egg = True
-                        self.object_to_find = self.symbolarray[1]
+                        self.object_to_find = self.symbol_white_egg
                         print("Found white egg, now searching for %s " % self.object_to_find)                           
                         self.method = "cards"
                 else:
@@ -159,7 +172,8 @@ class Vision:
         elif self.method == "brownegg" or "whiteegg":
             self.data = "rotate_right"
             
-        cv2.imshow('round shape', frame)
+		if show_feed:
+			cv2.imshow('round shape', frame)
 
     def offset_center(self, frame, center):
         shape = frame.shape
