@@ -1,11 +1,12 @@
 from time import sleep
 import lib.servo as servo
-import lib.leg2 as leg
+import lib.leg as leg
 import lib.animations as animations
 import threading
 
 class MotionController:
     def __init__(self, queue, main_queue):
+        sleep(0.2)
         self.servos = None
         self.legs = None
         self.initialize_legs()
@@ -17,7 +18,14 @@ class MotionController:
         self.event = threading.Event()
 
         self.angle = 0
-        self.bodyHeight = 100
+        self.rotateDirection = "None"
+        self.spanWidth = 130
+        self.bodyHeight = 119
+        self.rollx = 0
+        self.pitchy = 0
+        self.yawz = 0
+        self.statusValues = [self.angle, self.rotateDirection, self.spanWidth, self.bodyHeight, self.rollx, self.pitchy, self.yawz]
+
         self.animation = animations.idle
         self.timeout = 0.5
         self.totalKeyframes = -1
@@ -28,43 +36,60 @@ class MotionController:
         worker = threading.Thread(target=self.queue_worker)
         worker.start()
         while True:
-            servo_info_interval = 3.0
+            legs = self.legs
+            state = self.state
+
+            servo_info_interval = 1.0
             servo_info_timer = 0.0
 
-            if self.state != "idle" and self.animation != None:
-                animation = self.animation
-                sleep(self.timeout)
-                servo_info_timer += self.timeout
-
+            # if state is anything but idle
+            if self.state != "idle" and self.animation is not None:
                 totalKeyframes = self.totalKeyframes
-                legs = self.legs
+
+                # set legs to start position
+                for leg in self.legs:
+                    self.play_animation(0, leg)
 
                 # play animation
-                state = self.state
-                if totalKeyframes < 1:
+                if totalKeyframes <= 0:
                     while state == self.state:
-                        sleep(0.05)
+                        sleep(self.timeout)
+                        servo_info_timer += self.timeout
                         if servo_info_timer > servo_info_interval:
                             servo_info = self.get_servo_info()
                             self.main_queue.put({'servo_info': servo_info}) 
                             servo_info_timer = 0
                 else:
                     while state == self.state:
+                        """self.play_animation(self.keyframeEven, legs[0])
+                        self.play_animation(self.keyframeUneven, legs[3])
+                        sleep(self.timeout/3)
+                        self.play_animation(self.keyframeEven, legs[1])
+                        self.play_animation(self.keyframeUneven, legs[4])
+                        sleep(self.timeout/3)
+                        self.play_animation(self.keyframeEven, legs[2])
+                        self.play_animation(self.keyframeUneven, legs[5])"""
+                        
+                        """"self.play_animation(self.keyframeUneven, legs[3])
+                        self.play_animation(self.keyframeEven, legs[0])
+                        self.play_animation(self.keyframeEven, legs[4])
+                        self.play_animation(self.keyframeEven, legs[1])
+                        self.play_animation(self.keyframeUneven, legs[5])
+                        self.play_animation(self.keyframeUneven, legs[2])
+
+                        """
                         for leg in legs:
-                            #if leg.id == 1:
-                            #    print("playing animation (leg1): %d" % (self.keyframeUneven))
                             if leg.isEven:
-                                animation(self.keyframeEven, leg, angle=self.angle)
+                                self.play_animation(self.keyframeEven, leg)
                             else:
-                                animation(self.keyframeUneven, leg, angle=self.angle)
+                                self.play_animation(self.keyframeUneven, leg)
 
                         self.keyframeEven += 1
                         self.keyframeUneven += 1
 
-                        if self.keyframeEven > totalKeyframes:
-                            self.keyframeEven = 1
-                        if self.keyframeUneven > totalKeyframes:
-                            self.keyframeUneven = 1
+                        if self.keyframeEven > totalKeyframes: self.keyframeEven = 1
+                        if self.keyframeUneven > totalKeyframes: self.keyframeUneven = 1
+
                         sleep(self.timeout)
                         servo_info_timer += self.timeout
 
@@ -73,24 +98,23 @@ class MotionController:
                             self.main_queue.put({'servo_info': servo_info}) 
                             servo_info_timer = 0
 
-            elif self.state == "idle" and self.animation != None:
-                animation = self.animation
-                # set legs to start position
-                for leg in self.legs:
-                    animation(0, leg)
-
-                state = self.state
+            # if state is idle
+            elif self.state == "idle" and self.animation is not None:
                 while state == self.state:
-                    sleep(0.05)
-                    servo_info_timer += 0.05
+                    for leg in legs:
+                        self.play_animation(0, leg)
+
+                    sleep(self.timeout)
+                    servo_info_timer += self.timeout
+
                     if servo_info_timer > servo_info_interval:
                             servo_info = self.get_servo_info()
                             self.main_queue.put({'servo_info': servo_info}) 
                             servo_info_timer = 0
 
             
-            sleep(0.05)
-            servo_info_timer += 0.05
+            sleep(0.1)
+            servo_info_timer += 0.1
 
             if servo_info_timer > servo_info_interval:
                 servo_info = self.get_servo_info()
@@ -102,23 +126,24 @@ class MotionController:
             if not self.queue.empty():
                 # process command
                 command = self.queue.get()
-                print(command)
-
-                # motion commands are for changing specific variables (height, yaw, pitch etc.)
+                # motion commands are for changing specific variables (height, angle, yaw, pitch etc.)
                 # example: 'height:100'
                 if 'motion_command' in command:
                     new_command = command['motion_command']
-                    if new_command == None:
+                    if new_command is None:
                         continue
 
                     # try to get a valid value
                     try:
-                        seperator = new_command.index(":")
+                        seperator = new_command.index(",")
                         new_value = int(new_command[seperator + 1:])
                         new_command = new_command[:seperator]
 
                         if new_command == "height":
                             self.bodyHeight = new_value
+
+                        elif new_command == "angle":
+                            self.angle = new_value
 
                     except:
                         print("Invalid motion_command")
@@ -128,7 +153,7 @@ class MotionController:
                 # example: '0', '90', 'idle'
                 elif 'motion_state' in command:
                     new_state = command["motion_state"]
-                    if new_state == None:
+                    if new_state is None or new_state == self.state:
                         continue
 
                     # try to get an angle value and expect the walk state, else expect a different state
@@ -136,21 +161,19 @@ class MotionController:
                         angleValue = int(new_state)
                         # update current walk state with new angle
                         if self.state == "walk":
-                            if angleValue - self.angle > 5 and angleValue - self.angle < -5:
+                            if angleValue - self.angle > -5 and angleValue - self.angle < 5:
                                 continue
-                                    
                             self.angle = angleValue
+
                         # activate walk state   
                         else:
                             self.angle = int(new_state)
+                            self.rotateDirection = "none"
                             self.animation = animations.walk
-                            # set legs to start position
-                            for leg in self.legs:
-                                self.animation(0, leg, angle=self.angle)
                             self.timeout = 0.18
                             self.totalKeyframes = 4
                             self.setup_keyframes()
-                            self.state = "walk"
+                            self.state = str(new_state)
                     except:
                         if new_state == "idle":
                             self.angle = 0
@@ -158,31 +181,53 @@ class MotionController:
                             self.timeout = 0.5
                             self.totalKeyframes = -1
                             self.setup_keyframes()
-                            self.state = "idle"  
+                            self.state = str(new_state)
+
+                        elif new_state == "rotate_left":
+                            self.angle = 0
+                            self.rotateDirection = "left"
+                            self.animation = animations.walk
+                            self.timeout = 0.15
+                            self.totalKeyframes = 4
+                            self.setup_keyframes()
+                            self.state = str(new_state)
+
+                        elif new_state == "rotate_right":
+                            self.angle = 0
+                            self.rotateDirection = "right"
+                            self.animation = animations.walk
+                            self.timeout = 0.15
+                            self.totalKeyframes = 4
+                            self.setup_keyframes()
+                            self.state = str(new_state)
+
                         elif new_state == "clap":
                             self.angle = 0
                             self.animation = animations.balloon
                             self.timeout = .5
                             self.totalKeyframes = 3
-                            self.state = "clap"  
+                            self.state = str(new_state)
+
                         elif new_state == "twerk":
                             self.angle = 0
                             self.animation = animations.twerk
                             self.timeout = .3
                             self.totalKeyframes = 2
-                            self.state = "twerk"  
+                            self.state = str(new_state)
+                            
                         elif new_state == "greet":
                             self.angle = 0
                             self.animation = animations.greet
                             self.timeout = .3
                             self.totalKeyframes = 2
-                            self.state = "greet"  
+                            self.state = str(new_state)
+
                         elif new_state == "dab":
                             self.angle = 0
                             self.animation = animations.dab
                             self.timeout = .3
                             self.totalKeyframes = 2
-                            self.state = "dab"  
+                            self.state = str(new_state)
 
 
             self.event.wait(.1)   
@@ -204,6 +249,11 @@ class MotionController:
         else:
             self.keyframeUneven = self.totalKeyframes / 2 + 1
 
+    def play_animation(self, keyframe, leg):
+        self.statusValues = [self.angle, self.rotateDirection, self.spanWidth, self.bodyHeight, self.rollx, self.pitchy, self.yawz]
+        self.animation(keyframe, leg, self.statusValues)
+
+
     def get_servo_info(self):
         try:
             info = ""
@@ -211,7 +261,7 @@ class MotionController:
             info = info + ";" + str(0)
             for servo in self.servos:
                 info = info + ';' + str(servo.getTemperature()) + ',' + str(servo.getAngle());
-                sleep(0.001)
+                sleep(0.002)
             
             return info
         except:

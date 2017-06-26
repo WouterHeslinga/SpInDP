@@ -17,7 +17,7 @@ class Servo():
         self.joint = joint
         self.temperature = 0
         self.angle = 0
-        self.defaultSpeed = 850
+        self.defaultSpeed = 950
     
     def getTemperature(self):
         self.temperature = ax.readTemperature(self.id)
@@ -43,8 +43,8 @@ class Servo():
             if rotation < 175:
                 rotation = 175
 
-            elif rotation > 860:
-                rotation = 860
+            elif rotation > 850:
+                rotation = 850
 
         elif self.joint == "foot":
             if rotation < 175:
@@ -81,6 +81,7 @@ def mapServos():
     for x in range (1,19):
         try:
             print "Pinging: " + str(x) + "... ",
+            sleep(.01)
             ax.ping(x)
             ax.setLedStatus(x,1)
 
