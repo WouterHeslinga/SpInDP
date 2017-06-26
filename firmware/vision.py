@@ -8,20 +8,26 @@ from picamera import PiCamera
 from time import sleep
 import threading
 import motion_controller
+import RPi.GPIO as GPIO
+
 
 class Vision:
     """Vision Class"""
-    def __init__(self, show_feed, queue, queue_main, method, symbolarray = None):
+    def __init__(self, queue, queue_main):
         self.vs = PiVideoStream().start()
+		
+		#Warmup camera
         sleep(.2)
+
+		GPIO.setmode(GPIO.BCM)
+		GPIO.setup(21, GPIO.OUT)
+		self.pwm = GPIO.PWM(21, 100)
+		self.pwm.start(5)
         self.queue = queue
-        self.queue_main = queue_main
-        self.show_feed = show_feed
-        self.method = method
+        self.queue_main = queue_main      
         self.status = False
         self.shapes = ['club', 'diamond', 'heart', 'spade']
         self.shape_contours = self.get_reference_shapes_contours()
-        self.symbolarray = symbolarray
         self.found_white_egg = False
         self.found_brown_egg = False
         self.event = threading.Event()
@@ -29,16 +35,22 @@ class Vision:
         self.send_data_worker = threading.Thread(target=self.send_data)
         self.send_data_worker.start()
 
+		#Settings
+		self.method = "cards"
+		self.symbol_white_egg = "club"
+		self.symbol_brown_egg = "diamond"
+		self.show_feed = False
+
         #Variables for finding objects
         self.balloonRadius = 100
         self.eggRadius = 35
         self.shapeArea = 1000
         
     def update(self):
-        """Process one frame"""        
+        """Process one frame"""       
         frame = self.vs.read()
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-
+		
         if self.method == "cards":
             # Detect the shapes
             if self.object_to_find == "heart":
@@ -60,46 +72,7 @@ class Vision:
         self.queue.put(self.status)
         cv2.waitKey(10)
 
-    # Old method
-    """def process_shapes(self, hsv, render_frame=None):
-        #Detects the four symbols
-        # Find the contours
-        red = self.color_filter(hsv, 'red')
-        _, red_contours, _ = cv2.findContours(red, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-        black = self.color_filter(hsv, 'black')
-        _, black_contours, _ = cv2.findContours(black, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-
-        # render threshold
-        if render_frame is not None:
-            cv2.imshow('black', black)
-            cv2.imshow('red', red)
-
-        # Match each individual shapes
-        for shape in self.shapes:
-            contour = self.shape_contours[shape]
-            found_contour = self.best_matching_shape((red_contours if shape == 'heart' or shape == 'diamond' else black_contours), contour)
-            self.status['symbols'][shape] = found_contour is not None
-
-            # Draw contour if show_Feed is true
-            if found_contour is not None and render_frame is not None:
-                print("Found %s" % shape)
-                
-                color = None
-                if shape == 'heart':
-                    color = (0, 255, 0)
-                if shape == 'diamond':
-                    color = (50, 200, 60)
-                if shape == 'spade':
-                    color = (90, 90, 30)
-                if shape == 'club':
-                    color = (100, 20, 20)
-
-                render_frame = cv2.drawContours(render_frame, [found_contour], 0, color, 3)
-        
-        if self.show_feed:
-            cv2.imshow(shape, render_frame)
-    """
-
+    
     # New method
     def process_shape(self, hsv, frame):
         #find the proper contours
@@ -145,64 +118,6 @@ class Vision:
         
         return largest_contour
 
-    #Old Method keep just in case
-    """def get_round_contour(self, hsv, frame):
-        mask = self.color_filter(hsv, 'redballoon')
-        contours = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2]
-        center = None
-        #self.show_image('mask', mask)
-        if len(contours) > 0:
-            c = max(contours, key=cv2.contourArea)
-            ((x, y), radius) = cv2.minEnclosingCircle(c)
-            M=cv2.moments(c)
-            try:
-                center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
-            except:
-                pass
-            
-            if radius > 10:
-                cv2.circle(frame, (int(x), int(y)), int(radius), (0, 255, 255), 2)
-                cv2.circle(frame, center, 5, (0, 0, 255), -1)                
-                color = (255,255,255)
-
-                #Balloon module
-                if(self.method == "redballoon"):
-                    if radius > self.balloonRadius:
-                        self.data = "clap"
-                    else: 
-                        self.data = self.offset_center(frame, center)[0]
-                
-                #Egg module
-                elif (self.method == "brownegg" or "whiteegg"):
-                    if radius > self.eggRadius:
-                        self.data = "close"
-
-                        if self.method == "brownegg":
-                            self.found_brown_egg = True
-                            self.object_to_find = self.symbolarray[0]
-                            print("Found brown egg, now searching for " + self.symbolarray[0])
-                            
-                                #ROTATE TO SEARCH THE SYMBOL
-                                                       
-                            self.method = "cards"
-
-                        elif self.method == "whiteegg":
-                            self.found_white_egg = True
-                            self.object_to_find = self.symbolarray[1]
-                            print("Found white egg, now searching for " + self.symbolarray[1])
-                            
-                                #ROTATE TO SEARCH THE SYMBOL
-                                                        
-                            self.method = "cards"
-                    else:
-                        self.data = self.offset_center(frame, center)[0]
-            
-            if self.method == "brownegg" or "whiteegg":
-                #Rotate to find the egg
-            
-        cv2.imshow('round shape', frame)
-    """
-
     #New method only calculates stuff for the largest contour in the frame
     def get_round_contour(self, hsv, frame):
         mask = self.color_filter(hsv, self.method)
@@ -239,13 +154,13 @@ class Vision:
 
                     if self.method == "brownegg":
                         self.found_brown_egg = True
-                        self.object_to_find = self.symbolarray[0]
+                        self.object_to_find = self.symbol_brown_egg
                         print("Found brown egg, now searching for %s" % self.object_to_find)          
                         self.method = "cards"
 
                     elif self.method == "whiteegg":
                         self.found_white_egg = True
-                        self.object_to_find = self.symbolarray[1]
+                        self.object_to_find = self.symbol_white_egg
                         print("Found white egg, now searching for %s " % self.object_to_find)                           
                         self.method = "cards"
                 else:
@@ -255,7 +170,8 @@ class Vision:
         elif self.method == "brownegg" or "whiteegg":
             self.data = "rotate"
             
-        cv2.imshow('round shape', frame)
+		if show_feed:
+			cv2.imshow('round shape', frame)
 
     def offset_center(self, frame, center):
         shape = frame.shape
