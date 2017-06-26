@@ -52,6 +52,7 @@ void init_screen();
 void render();
 void gyrosensor();
 void handle_joystick();
+bool in_rekt(int px, int py, int x, int y, int w, int h);
 
 TouchScreen ts = TouchScreen(XP, YP, XM, YM);
 
@@ -61,6 +62,22 @@ float voltagelast = 0;
 //Pins
 int pinJoyX = A6;
 int pinJoyY = A7;
+
+enum States {
+  MANUAL,
+  BALLOON,
+  FURY_ROAD,
+  EGG_GAME,
+  DANCE
+};
+
+enum Symbols {
+  NONE,
+  SPADE,
+  CLUB,
+  DIAMOND,
+  HEART
+};
 
 struct Values {
   //Menu and display
@@ -75,7 +92,7 @@ struct Values {
   int yaw = 0;
   int roll = 0;
   //State
-  String state = "manual";
+  States state = MANUAL;
   //Changed bools
   bool screen_changed = false;
   bool joy_changed = false;
@@ -83,9 +100,15 @@ struct Values {
   bool switch_changed = false;
   bool state_changed = false;
 };
+
 Values values;
 Values last_values;
 bool values_changed = false;
+
+//Stuff for the egg selection
+bool show_egg_select = false;
+Symbols selected_symbol = NONE;
+Symbols selected_symbol_second = NONE;
 
 const int SW_pin = 3;
 
@@ -186,7 +209,7 @@ void setup() {
 * logic
 */
 void input_touchscreen() {
-    // a point object holds x y and z coordinates.
+  // a point object holds x y and z coordinates.
   Point p = ts.getPoint();      //kijken of en waar er op het scherm gedrukt wordt
 
   //map the ADC value read to into pixel co-ordinates
@@ -196,50 +219,94 @@ void input_touchscreen() {
   // we have some minimum pressure we consider 'valid'
   // pressure of 0 means no pressing!
   if (p.z > __PRESURE) {        //om te bepalen of er op een knop wordt gedrukt
-      //om te bepalen welke knop er wordt ingedrukt
-      if(p.y > 7 && p.y < 27 && p.x > 7 && p.x < 62 && values.show_menu == 0)
-      {
-        menu();           //menu op het scherm zetten
-        values.show_menu = 1;
-      }
-      else if (p.y > 7 && p.y < 27 && p.x > 7 && p.x < 62 && values.show_menu == 1)
-      {
-        init_screen();
-        values.show_menu = 0;
-      }
-      else if (p.y > 7 && p.y < 30 && p.x > 70 && p.x < 220 && values.show_menu == 1)
-      {
-        init_screen();
-        values.show_menu = 0;
-        values.screen_choice = 1;
-      }
-      else if (p.y > 31 && p.y < 57 && p.x > 70 && p.x < 220 && values.show_menu == 1)
-      {
-        init_screen();
-        values.show_menu = 0;
-        values.screen_choice = 2;
-      }
-      else if (p.y > 58 && p.y < 84 && p.x > 70 && p.x < 220 && values.show_menu == 1)
-      {
-        init_screen();
-        values.show_menu = 0;
-        values.screen_choice = 3;
-      }
-      else if (p.y > 85 && p.y < 111 && p.x > 70 && p.x < 220 && values.show_menu == 1)
-      {
-        init_screen();
-        values.show_menu = 0;
-        values.screen_choice = 4;
-      }
-      else if (p.y > 112 && p.y < 138 && p.x > 70 && p.x < 220 && values.show_menu == 1)
-      {
-        init_screen();
-        values.show_menu = 0;
-        values.screen_choice = 5;
+    if(show_egg_select) {
+      Symbols symbol = NONE;
+      if(in_rekt(p.x, p.y, 5, 75, 110, 55)) { // Club
+        symbol = CLUB;
+      } else if (in_rekt(p.x, p.y, 125, 75, 110, 55)) { // Spade
+        symbol = SPADE;
+      } else if (in_rekt(p.x, p.y, 5, 145, 110, 55)) { // Diamond
+        symbol = DIAMOND;
+      } else if (p.x, p.y, 125, 145, 110, 55) { // Heart
+        symbol = HEART;
       }
 
-      voltagelast = 0;
+      if (symbol != NONE) {
+        if (selected_symbol == NONE) {
+          selected_symbol = symbol;
+          render_egg_menu();
+        } else {
+          if (selected_symbol == symbol) {
+            selected_symbol = NONE;
+            render_egg_menu();
+          } else {
+            Serial.print((String)"egg:" + selected_symbol + ":" + symbol + "\n");
+            selected_symbol_second = symbol;
+            show_egg_select = false;
+            init_screen();
+          }
+        }
+      }
+    }
+    //om te bepalen welke knop er wordt ingedrukt
+    if(p.y > 7 && p.y < 27 && p.x > 7 && p.x < 62 && values.show_menu == 0)
+    {
+      menu();           //menu op het scherm zetten
+      values.show_menu = 1;
+    }
+    else if (p.y > 7 && p.y < 27 && p.x > 7 && p.x < 62 && values.show_menu == 1)
+    {
+      init_screen();
+      values.show_menu = 0;
+    }
+    else if (p.y > 7 && p.y < 30 && p.x > 70 && p.x < 220 && values.show_menu == 1)
+    {
+      init_screen();
+      values.show_menu = 0;
+      values.state = MANUAL;
+    }
+    else if (p.y > 31 && p.y < 57 && p.x > 70 && p.x < 220 && values.show_menu == 1)
+    {
+      values.show_menu = 0;
+      values.state = BALLOON;
+      Serial.print((String)"state:balloon\n");
+      init_screen();
+    }
+    else if (p.y > 58 && p.y < 84 && p.x > 70 && p.x < 220 && values.show_menu == 1)
+    {
+      values.show_menu = 0;
+      values.state = FURY_ROAD;
+      Serial.print((String)"state:fury_road\n");      
+      init_screen();
+    }
+    else if (p.y > 85 && p.y < 111 && p.x > 70 && p.x < 220 && values.show_menu == 1)
+    {
+      values.show_menu = 0;
+      init_screen();
+      values.state = EGG_GAME;
+      selected_symbol = NONE;
+      selected_symbol_second = NONE;
+      show_egg_select = true;
+      render_egg_menu();
+    }
+    else if (p.y > 112 && p.y < 138 && p.x > 70 && p.x < 220 && values.show_menu == 1)
+    {
+      values.state = DANCE;
+      values.show_menu = 0;
+      Serial.print((String)"state:dance\n");      
+      init_screen();
+    }
+    if (values.state != EGG_GAME)
+      show_egg_select = false;
   }
+}
+
+bool in_rekt(int px, int py, int x, int y, int w, int h) {
+  int x2 = x + w;
+  int y2 = y + h;
+  return
+    px >= x && px <= x2 &&
+    py >= y && py <= y2;
 }
 
 /**
@@ -382,98 +449,105 @@ void handle_joystick() {
 void render() {
   int xval = 0;
   int yval = 0;
-  if(values.show_menu != 1) {
-    switch(values.screen_choice) {
-      case 1:
-        Tft.drawString("Manueel",73,10,2,WHITE);
-        Tft.drawString("Joystick",10,180,2,WHITE);
-        Tft.drawString("X =",10,200,2,WHITE);
-        Tft.drawString("Y =",130,200,2,WHITE);
-        Tft.drawString("Switch =",10,220,2,WHITE);
-        Tft.drawString("Gyrosensor",10,100,2,WHITE);
-        Tft.drawString("X =",10,120,2,WHITE);
-        Tft.drawString("Y =",125,120,2,WHITE);
-        Tft.drawString("Z =",10,140,2,WHITE);
 
-        if (values.joy_changed) {
-          Tft.fillRectangle(50, 200, 75,15,BLACK);
-          Tft.drawNumber(values.joy_x,50,200,2,WHITE);
-          Tft.fillRectangle(170, 200, 75,15,BLACK);
-          Tft.drawNumber(values.joy_y,170,200,2,WHITE);
-          Tft.fillRectangle(110, 220, 15,15,BLACK);
-          Tft.drawNumber(values.joy_press,110,220,2,WHITE);
-        }
-        
-        if (values.gyro_changed) {
-          Tft.fillRectangle(50, 120, 75,15,BLACK);
-          Tft.drawFloat(values.yaw,2,50,120,2,WHITE);
-          Tft.fillRectangle(165, 120, 75,15,BLACK);
-          Tft.drawFloat(values.pitch,2,165,120,2,WHITE);
-          Tft.fillRectangle(50, 140, 85,15,BLACK);
-          Tft.drawFloat(values.roll,2,50,140,2,WHITE);
-        }
-        break;
-      case 2:
-        Tft.drawString("Keuze 2",73,10,2,WHITE);
-        break;
-      case 3:
-        Tft.drawString("Keuze 3",73,10,2,WHITE);
-        break;
-      case 4:
-        Tft.drawString("Keuze 4",73,10,2,WHITE);
+  if(!show_egg_select) {
+    if(values.show_menu != 1) {
+      switch(values.state) {
+        case MANUAL: Tft.drawString("Manual",73,10,2,WHITE); break;
+        case BALLOON: Tft.drawString("Balloon",73,10,2,WHITE); break;
+        case FURY_ROAD: Tft.drawString("Fury Road",73,10,2,WHITE); break;
+        case EGG_GAME: Tft.drawString("Egg Game",73,10,2,WHITE); break;
+        case DANCE: Tft.drawString("Dance",73,10,2,WHITE); break;
+      }
 
-        xval = values.pitch;
-        yval = values.roll;
-        xval = map(xval, -40, 40, 0, 230);
-        yval = map(yval, -30, 30, 0, 310);
-        xval = constrain(xval, 0, 230);
-        yval = constrain(yval, 0, 310);
-        Tft.fillRectangle(xval, yval, 10,10,random(0xFFFF));
+      Tft.drawString("Gyrosensor",10,100,2,WHITE);
+      Tft.drawString("X =",10,120,2,WHITE);
+      Tft.drawString("Y =",125,120,2,WHITE);
+      Tft.drawString("Z =",10,140,2,WHITE);
+      Tft.drawString("Joystick",10,180,2,WHITE);
+      Tft.drawString("X =",10,200,2,WHITE);
+      Tft.drawString("Y =",130,200,2,WHITE);
+      Tft.drawString("Switch =",10,220,2,WHITE);
+      Tft.drawString("Symbol =",10, 260,2,WHITE);
+      Tft.drawString("Symbol2=",10, 280,2,WHITE);
 
-        if(digitalRead(SW_pin) == 0){
-          init_screen();
-        }
-        
-        break;
-      case 5:
-        Tft.drawString("Keuze 5",73,10,2,WHITE);
-        xval = values.joy_x;
-        yval = values.joy_y;
-        xval = map(xval, 0, 1023, 0, 230);
-        yval = map(yval, 0, 1023, 0, 310);
-        xval = constrain(xval, 0, 230);
-        yval = constrain(yval, 0, 310);
-        Tft.fillRectangle(xval, yval, 10,10,random(0xFFFF));
+      Tft.fillRectangle(160,260,70,15, BLACK);
+      switch (selected_symbol) {
+        case NONE: Tft.drawString("None", 160, 260,2,WHITE); break;
+        case SPADE: Tft.drawString("Spade", 160, 260,2,WHITE); break;
+        case CLUB: Tft.drawString("Club", 160, 260,2,WHITE); break;
+        case DIAMOND: Tft.drawString("Diamond", 160, 260,2,WHITE); break;
+        case HEART: Tft.drawString("Heart", 160, 260,2,WHITE); break;
+      }
 
-        if(digitalRead(SW_pin) == 0){
-          init_screen();
-        }
-        
-        break;
+      Tft.fillRectangle(160,280,70,15, BLACK);
+      switch (selected_symbol_second) {
+        case NONE: Tft.drawString("None", 160, 280,2,WHITE); break;
+        case SPADE: Tft.drawString("Spade", 160, 280,2,WHITE); break;
+        case CLUB: Tft.drawString("Club", 160, 280,2,WHITE); break;
+        case DIAMOND: Tft.drawString("Diamond", 160, 280,2,WHITE); break;
+        case HEART: Tft.drawString("Heart", 160, 280,2,WHITE); break;
+      }
+
+      if (values.joy_changed) {
+        Tft.fillRectangle(50, 200, 75,15,BLACK);
+        Tft.drawNumber(values.joy_x,50,200,2,WHITE);
+        Tft.fillRectangle(170, 200, 75,15,BLACK);
+        Tft.drawNumber(values.joy_y,170,200,2,WHITE);
+        Tft.fillRectangle(110, 220, 15,15,BLACK);
+        Tft.drawNumber(values.joy_press,110,220,2,WHITE);
+      }
+      
+      if (values.gyro_changed) {
+        Tft.fillRectangle(50, 120, 75,15,BLACK);
+        Tft.drawFloat(values.yaw,2,50,120,2,WHITE);
+        Tft.fillRectangle(165, 120, 75,15,BLACK);
+        Tft.drawFloat(values.pitch,2,165,120,2,WHITE);
+        Tft.fillRectangle(50, 140, 85,15,BLACK);
+        Tft.drawFloat(values.roll,2,50,140,2,WHITE);
+      }
     }
-  }
-    
-  if (voltage != voltagelast && values.show_menu != 1)  //kijken of er waarden zijn verandert
-  {
-    Tft.fillRectangle(120, 160, 50,15,BLACK);
-    Tft.drawFloat(voltage,1,120,160,2,WHITE);   // draw float: voltage, (120, 200), size: 2, decimal: 1, color: WHITE
-    voltagelast = voltage;
+      
+    // if (voltage != voltagelast && values.show_menu != 1)  //kijken of er waarden zijn verandert
+    // {
+    //   Tft.fillRectangle(120, 160, 50,15,BLACK);
+    //   Tft.drawFloat(voltage,1,120,160,2,WHITE);   // draw float: voltage, (120, 200), size: 2, decimal: 1, color: WHITE
+    //   voltagelast = voltage;
+    // }
   }
 }
 
-void menu() {   //functie om het menu op het scherm te zetten
+void render_egg_menu() {
+    //Color egg
+    Tft.drawString("Symbol:", 5, 50, 2, WHITE);
+
+    Tft.fillRectangle(5, 75, 110, 55, selected_symbol == CLUB ? 0xFF00FF : 0x00FF00);
+    Tft.fillRectangle(125, 75, 110, 55, selected_symbol == SPADE ? 0xFF00FF : 0x00FF00);
+    Tft.fillRectangle(5, 145, 110, 55, selected_symbol == DIAMOND ? 0xFF00FF : 0x00FF00); 
+    Tft.fillRectangle(125, 145, 110, 55, selected_symbol == HEART ? 0xFF00FF : 0x00FF00);
+
+    Tft.drawString("Club", 20, 95, 2, BLACK);
+    Tft.drawString("Spade", 135, 95, 2, BLACK);
+    Tft.drawString("Diamond", 20, 160, 2, BLACK);
+    Tft.drawString("Heart", 135, 160, 2, BLACK);
+}
+
+void menu() { //functie om het menu op het scherm te zetten
   Tft.fillRectangle(70, 7, 150, 250, WHITE);
-  Tft.drawString("Manueel",73,10,2,BLACK);
+  Tft.drawString("Manual",73,10,2,BLACK);
   Tft.drawString("Balloon",73,37,2,BLACK);
   Tft.drawString("Fury Road",73,64,2,BLACK);
   Tft.drawString("Egg Game",73,91,2,BLACK);
   Tft.drawString("Dance",73,118,2,BLACK);
 }
 
-void init_screen() {   //functie om het standaard scherm op het scherm te zetten
+void clear_screen() {
   Tft.fillScreen(0, 240, 0, 320, BLACK);
-  Tft.drawRectangle(8, 7, 54,20,WHITE);
+}
+
+void init_screen() {   //functie om het standaard scherm op het scherm te zetten
+  clear_screen();
+  Tft.drawRectangle(8, 7, 54,35,WHITE);
   Tft.drawString("MENU",10,10,2,WHITE);
-  Tft.drawString("IDP Groep 6 Robert",10,310,1,random(0xFFFF));
-  Tft.drawString("Voltage:",10,160,2,WHITE);
+  Tft.drawString("IDP Groep 6 Robert",10,310,1,WHITE);
 }
