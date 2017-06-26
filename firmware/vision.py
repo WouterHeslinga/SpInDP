@@ -31,11 +31,10 @@ class Vision:
         self.send_data_worker = threading.Thread(target=self.send_data)
         self.send_data_worker.start()
 
-		#Settings
-		self.method = "cards"
+        self.method = "cards"
+        self.symbol_brown_egg = None
         self.symbol_white_egg = None
-		self.symbol_brown_egg = None
-		self.show_feed = False
+        self.show_feed = False
 
         if not self.queue.empty():
             command = self.queue.get()
@@ -52,11 +51,10 @@ class Vision:
         self.eggRadius = 35
         self.shapeArea = 1000
 
-        #egg beak
-		GPIO.setmode(GPIO.BCM)
-		GPIO.setup(21, GPIO.OUT)
-        #Warmup camera
-        sleep(.2)        
+        GPIO.setmode(GPIO.BCM)
+        GPIO.setup(21, GPIO.OUT)
+
+        sleep(.2)   
          
 
     def update(self):
@@ -80,7 +78,7 @@ class Vision:
         elif self.method == "brownegg" or "whiteegg":
             self.get_round_contour(hsv, frame.copy())
         else:
-            continue
+            return ValueError("Couldn't parse the given method")
 
         self.queue.put(self.status)
         cv2.waitKey(10)
@@ -189,9 +187,8 @@ class Vision:
         # if we cant find a contour with a radius > 10 we should look around for something bigger
         elif self.method == "brownegg" or "whiteegg":
             self.data = "rotate_right"
-            
-		if show_feed:
-			cv2.imshow('round shape', frame)
+        if show_feed:
+            cv2.imshow('round shape', frame)
 
     def offset_center(self, frame, center):
         shape = frame.shape
@@ -260,7 +257,7 @@ class Vision:
     def send_data(self):
         while True:
             #Send values
-            self.queue_main.put({'objectcoords': (int)self.data})
+            self.queue_main.put({'objectcoords': int(self.data)})
             self.event.wait(1)
     
     def release(self):
