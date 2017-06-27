@@ -18,7 +18,7 @@ class MotionController:
         self.event = threading.Event()
 
         self.angle = 0
-        self.rotateDirection = "None"
+        self.rotateDirection = "none"
         self.spanWidth = 130
         self.bodyHeight = 119
         self.rollx = 0
@@ -189,7 +189,7 @@ class MotionController:
                             self.animation = animations.walk
                             self.timeout = 0.15
                             self.totalKeyframes = 4
-                            if self.state != "walk" or self.state != "rotate_right":
+                            if self.state != "walk" and self.state != "rotate_right":
                                 self.setup_keyframes()
                             self.state = str(new_state)
 
@@ -199,7 +199,7 @@ class MotionController:
                             self.animation = animations.walk
                             self.timeout = 0.15
                             self.totalKeyframes = 4
-                            if self.state != "walk" or self.state != "rotate_left":
+                            if self.state != "walk" and self.state != "rotate_left":
                                 self.setup_keyframes()
                             self.state = str(new_state)
 

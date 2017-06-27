@@ -127,6 +127,7 @@ def idle(keyframe, leg, statusValues):
 
 def walk(keyframe, leg, statusValues):
     stepWidth = 70
+    stepHeight = 100 * -1
     isWalking = True
 
     if statusValues[1] == "right":
@@ -138,11 +139,15 @@ def walk(keyframe, leg, statusValues):
         if leg.id == 4 or leg.id == 5 or leg.id == 6:
             stepWidth *= -2
 
-    stepHeight = 100 *-1
     radfactor = math.pi / 180
     stepWidthY = stepWidth * math.cos(statusValues[0] * radfactor)
+    if stepWidthY % 2 != 0:
+        stepWidthY = int(stepWidthY - 1)
+
     stepWidthX = stepWidth * math.sin(statusValues[0] * radfactor)
-    print("Y: %d, X: %d" % (stepWidthY, stepWidthX))
+    if stepWidthX % 2 != 0:
+        stepWidthX = int(stepWidthX - 1)
+    #print("Y: %d, X: %d" % (stepWidthY, stepWidthX))
 
     
     startPos = [statusValues[2], 0, statusValues[3]]

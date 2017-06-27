@@ -11,7 +11,7 @@ import sys
 def vision_worker(queue, main_queue):
     """Worker for the vision"""
     print("Starting vision worker")
-    vision = Vision(True, queue, main_queue)
+    vision = Vision(queue, main_queue)
     while True:
         vision.update()
     return
@@ -57,23 +57,9 @@ if __name__ == '__main__':
     for worker in workers:
         worker.start()
 
-<<<<<<< HEAD
-=======
-    while should_run:   
-        event.wait(1)
-        if not queue_main.empty():
-            commands = queue_main.get()
-            if 'temps' in commands:
-                print(commands['temps'])
-            if 'objectcoords' in commands:
-                queue_motion.put({'motion_state': commands['objectcoords']})
-            if 'egg' in commands:
-                queue_motion.put({'egg': commands['objectcoords']})
-
->>>>>>> 7f2f6f4ee8c9df64d84454684e20b6c63368f4b4
     try:
         while should_run:   
-            #queue_main.put({'motion_state': raw_input("direction: ")})
+            queue_main.put({'motion_state': raw_input("direction: ")})
             #queue_main.put({'motion_command': raw_input("command: ")})
             sleep(0.04)
             if not queue_main.empty():
@@ -91,6 +77,8 @@ if __name__ == '__main__':
                 elif 'temps' in commands:
                     continue
                     print(commands['temps'])
+                elif 'egg' in commands:
+                    queue_motion.put({'egg': commands['objectcoords']})
 
 
     except KeyboardInterrupt:

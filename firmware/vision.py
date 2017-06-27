@@ -15,8 +15,7 @@ class Vision:
     """Vision Class"""
     def __init__(self, queue, queue_main):
         self.vs = PiVideoStream().start()
-        self.pwm = GPIO.PWM(21, 100)
-        self.pwm.start(5)
+        
         self.queue = queue
         self.queue_main = queue_main      
         self.status = False
@@ -26,6 +25,7 @@ class Vision:
         self.found_brown_egg = False
         self.event = threading.Event()
         self.data = None
+        self.object_to_find = ""
 
         #timer for sending data
         self.send_data_worker = threading.Thread(target=self.send_data)
@@ -53,7 +53,9 @@ class Vision:
 
         GPIO.setmode(GPIO.BCM)
         GPIO.setup(21, GPIO.OUT)
-
+        self.pwm = GPIO.PWM(21, 100)
+        self.pwm.start(5)
+        
         sleep(.2)   
          
 
@@ -156,10 +158,6 @@ class Vision:
                 else: 
                     self.data = self.offset_center(frame, center)[0]
             
-<<<<<<< HEAD
-        #cv2.imshow('round shape', frame)
-    
-=======
             #Egg module
             elif (self.method == "brownegg" or "whiteegg"):
 
@@ -194,7 +192,6 @@ class Vision:
         if show_feed:
             cv2.imshow('round shape', frame)
 
->>>>>>> 7f2f6f4ee8c9df64d84454684e20b6c63368f4b4
     def offset_center(self, frame, center):
         shape = frame.shape
         x_offset = float(center[0] - shape[1] / 2)
@@ -262,13 +259,8 @@ class Vision:
     def send_data(self):
         while True:
             #Send values
-<<<<<<< HEAD
-            self.queue_main.put({'objectcoords': self.data})
-            self.event.wait(2)
-=======
-            self.queue_main.put({'objectcoords': int(self.data)})
+            self.queue_main.put({'objectcoords': str(self.data)})
             self.event.wait(1)
->>>>>>> 7f2f6f4ee8c9df64d84454684e20b6c63368f4b4
     
     def release(self):
         self.vs.stop()
