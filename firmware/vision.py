@@ -19,7 +19,7 @@ class Vision:
         self.queue = queue
         self.queue_main = queue_main      
         self.status = False
-        self.shapes = ['club', 'diamond', 'heart', 'spade']
+        self.shapes = ['spade', 'club', 'diamond', 'heart']
         self.shape_contours = self.get_reference_shapes_contours()
         self.found_white_egg = False
         self.found_brown_egg = False
@@ -36,15 +36,7 @@ class Vision:
         self.symbol_white_egg = None
         self.show_feed = False
 
-        if not self.queue.empty():
-            command = self.queue.get()
-            print(command)
-            if 'egg' in command:
-                tempsymbols = command.split(',')
-                self.symbol_brown_egg = tempsymbols[0]
-                self.symbol_white_egg = tempsymbols[1]
-            else:
-                print("We didnt get an egg command")
+        
 
         #Variables for finding objects
         self.balloonRadius = 100
@@ -64,15 +56,28 @@ class Vision:
         frame = self.vs.read()
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 		
+        if not self.queue.empty():
+            command = self.queue.get()
+            print(command)
+            if 'egg' in command:
+                tempsymbols = command.split(',')
+                self.symbol_brown_egg = self.shapes[tempsymbols[0]-1]
+                print(self.symbol_brown_egg)
+                self.symbol_white_egg = self.shapes[tempsymbols[1]-1]
+                print(self.symbol_brown_egg)
+                self.method = "brownegg"
+            else:
+                print("We didnt get an egg command")
+
         if self.method == "cards":
-            # Detect the shapes
-            if self.object_to_find == "heart":
-                self.process_shape(hsv, frame.copy())
-            elif self.object_to_find == "spade":
+            # Detect the shapes            
+            if self.object_to_find == "spade":
                 self.process_shape(hsv, frame.copy())
             elif self.object_to_find == "club":
                 self.process_shape(hsv, frame.copy())
             elif self.object_to_find == "diamond":
+                self.process_shape(hsv, frame.copy())
+            elif self.object_to_find == "heart":
                 self.process_shape(hsv, frame.copy())
                 
         elif self.method == "redballoon":
@@ -168,8 +173,8 @@ class Vision:
                     print("Currently looking for white egg")
 
                 if radius > self.eggRadius:
-                    self.data = "lowrider"
-                    #wait some time for the spider to lower its body?
+                    self.data = "height,70"
+                    sleep(1)
                     self.data = "close"
 
                     if self.method == "brownegg":
@@ -259,7 +264,10 @@ class Vision:
     def send_data(self):
         while True:
             #Send values
-            self.queue_main.put({'objectcoords': str(self.data)})
+            if 'height' in self.data:
+                self.queue_main.put({'motion_command' : self.data})
+            else:
+                self.queue_main.put({'objectcoords': self.data})
             self.event.wait(1)
     
     def release(self):

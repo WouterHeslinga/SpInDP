@@ -74,12 +74,8 @@ if __name__ == '__main__':
                 elif 'objectcoords' in commands:
                     queue_motion.put({'motion_state': commands['objectcoords']})
 
-                elif 'temps' in commands:
-                    continue
-                    print(commands['temps'])
                 elif 'egg' in commands:
-                    queue_motion.put({'egg': commands['objectcoords']})
-
+                    queue_vision.put({'egg': commands['egg']})
 
     except KeyboardInterrupt:
         print('closing bluetooth')
