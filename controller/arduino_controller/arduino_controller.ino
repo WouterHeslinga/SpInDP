@@ -2,7 +2,7 @@
 #include <SeeedTouchScreen.h>
 #include <TFTv2.h>
 #include <SPI.h>
-#include <ArduinoJson.h>
+
 
 // I2Cdev and MPU6050 must be installed as libraries, or else the .cpp/.h files
 // for both classes must be in the include path of your project
@@ -420,18 +420,18 @@ void loop() {
 String old_state = "idle";
 void handle_joystick() {
   String state = old_state;
-  if(values.joy_x > 700) {
+  if(values.joy_y > 700) {
     //Serial.print("up");
     state = "0";
-  } else if (values.joy_x < 400) {
+  } else if (values.joy_y < 400) {
     //Serial.print("down");
     state = "180";
-  } else if (values.joy_y > 700) {
-    //Serial.print("left");
-    state = "270";
-  } else if (values.joy_y < 400) {
+  } else if (values.joy_x > 700) {
     //Serial.print("right");
     state = "90";
+  } else if (values.joy_x < 400) {
+    //Serial.print("left");
+    state = "270";
   } else {
     state = "idle";
   }
