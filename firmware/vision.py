@@ -37,8 +37,9 @@ class Vision:
 
         #Variables for finding objects
         self.balloonRadius = 100
-        self.eggRadius = 35
+        self.eggRadius = 50
         self.shapeArea = 1000
+        self.distance = 0
 
         GPIO.setmode(GPIO.BCM)
         GPIO.setup(21, GPIO.OUT)
@@ -63,6 +64,8 @@ class Vision:
                 self.symbol_white_egg = self.shapes[int(split[1])-1]
                 print(self.symbol_white_egg)
                 self.method = "brownegg"
+            elif 'distance' in command:
+                self.distance = commands
             else:
                 print("We didnt get an egg command")
 
@@ -123,7 +126,7 @@ class Vision:
 
         if found_contour is not None:
             print("Found %s moving towards it" % self.object_to_find)
-            if radius > 100:
+            if self.distance < 250 and self.distance > 0:
                 self.data = "height,150"
                 print("High mode for dropping of the egg")
                 sleep(2)
