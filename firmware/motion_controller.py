@@ -170,7 +170,7 @@ class MotionController:
                             self.angle = int(new_state)
                             self.rotateDirection = "none"
                             self.animation = animations.walk
-                            self.timeout = 0.18
+                            self.timeout = 0.26
                             self.totalKeyframes = 4
                             self.setup_keyframes()
                             self.state = str(new_state)
@@ -187,7 +187,7 @@ class MotionController:
                             self.angle = 0
                             self.rotateDirection = "left"
                             self.animation = animations.walk
-                            self.timeout = 0.15
+                            self.timeout = 0.18
                             self.totalKeyframes = 4
                             if self.state != "walk" and self.state != "rotate_right":
                                 self.setup_keyframes()
@@ -197,7 +197,7 @@ class MotionController:
                             self.angle = 0
                             self.rotateDirection = "right"
                             self.animation = animations.walk
-                            self.timeout = 0.15
+                            self.timeout = 0.18
                             self.totalKeyframes = 4
                             if self.state != "walk" and self.state != "rotate_left":
                                 self.setup_keyframes()
@@ -262,8 +262,9 @@ class MotionController:
             info = info + str(80)
             info = info + ";" + str(0)
             for servo in self.servos:
-                info = info + ';' + str(servo.getTemperature()) + ',' + str(servo.getAngle());
-                sleep(0.002)
+                #info = info + ';' + str(0) + ',' + str(0)
+                info = info + ';' + str(servo.getTemperature()) + ',' + str(servo.getAngle())
+                sleep(0.001)
             
             return info
         except:

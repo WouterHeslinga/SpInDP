@@ -87,4 +87,7 @@ class BluetoothServer:
             self.main_queue.put({'motion_state': commands[1]})
         elif commands[0] == 'motion_command':
             self.main_queue.put({'motion_command': commands[1]})
+        elif commands[0] == 'egg':
+            self.main_queue.put({'egg': commands[1] + "," + commands[2]})
+        
         

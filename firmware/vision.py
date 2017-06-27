@@ -18,7 +18,6 @@ class Vision:
         
         self.queue = queue
         self.queue_main = queue_main      
-        self.status = False
         self.shapes = ['spade', 'club', 'diamond', 'heart']
         self.shape_contours = self.get_reference_shapes_contours()
         self.found_white_egg = False
@@ -26,6 +25,7 @@ class Vision:
         self.event = threading.Event()
         self.data = None
         self.object_to_find = ""
+
 
         #timer for sending data
         self.send_data_worker = threading.Thread(target=self.send_data)
@@ -58,13 +58,13 @@ class Vision:
 		
         if not self.queue.empty():
             command = self.queue.get()
-            print(command)
+            commands = command['egg']
+            split = commands.split(",")
             if 'egg' in command:
-                tempsymbols = command.split(',')
-                self.symbol_brown_egg = self.shapes[tempsymbols[0]-1]
+                self.symbol_brown_egg = self.shapes[int(split[0])-1]
                 print(self.symbol_brown_egg)
-                self.symbol_white_egg = self.shapes[tempsymbols[1]-1]
-                print(self.symbol_brown_egg)
+                self.symbol_white_egg = self.shapes[int(split[1])-1]
+                print(self.symbol_white_egg)
                 self.method = "brownegg"
             else:
                 print("We didnt get an egg command")
@@ -87,7 +87,6 @@ class Vision:
         else:
             return ValueError("Couldn't parse the given method")
 
-        self.queue.put(self.status)
         cv2.waitKey(10)
 
     
@@ -100,7 +99,7 @@ class Vision:
         _, black_contours, _ = cv2.findContours(black, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
         contour = self.shape_contours[self.object_to_find]
-        found_contour = self.best_matching_shape((red_contours if shape == 'heart' or 'diamond' else black_contours), contour)
+        found_contour = self.best_matching_shape((red_contours if self.object_to_find == 'heart' or 'diamond' else black_contours), contour)
         
         center = None
         ((x,y), radius) = cv2.minEnclosingCircle(contour)
@@ -194,7 +193,7 @@ class Vision:
         # if we cant find a contour with a radius > 10 we should look around for something bigger
         elif self.method == "brownegg" or "whiteegg":
             self.data = "rotate_right"
-        if show_feed:
+        if self.show_feed:
             cv2.imshow('round shape', frame)
 
     def offset_center(self, frame, center):
@@ -263,8 +262,11 @@ class Vision:
 
     def send_data(self):
         while True:
+            if self.data is None:
+                continue
+
             #Send values
-            if 'height' in self.data:
+            if "height" in self.data:
                 self.queue_main.put({'motion_command' : self.data})
             else:
                 self.queue_main.put({'objectcoords': self.data})
