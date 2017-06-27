@@ -74,9 +74,8 @@ if __name__ == '__main__':
                     queue_bluetooth.put({'servo_info': commands['servo_info']})
                 elif 'motion_state' in commands:
                     queue_motion.put({'motion_state': commands['motion_state']})
-                elif 'motion_state' in commands:
+                elif 'motion_command' in commands:
                     queue_motion.put({'motion_command': commands['motion_command']})
-
                 elif 'temps' in commands:
                     print(commands['temps'])
                 elif 'objectcoords' in commands:

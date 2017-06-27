@@ -3,6 +3,7 @@ import lib.servo as servo
 import lib.leg as leg
 import lib.animations as animations
 import threading
+import RPi.GPIO as GPIO
 
 class MotionController:
     def __init__(self, queue, main_queue):
@@ -31,6 +32,12 @@ class MotionController:
         self.totalKeyframes = -1
         self.keyframeEven = 0
         self.keyframeUneven = 0
+
+        # Beak
+        GPIO.setmode(GPIO.BCM)
+        GPIO.setup(21, GPIO.OUT)
+        self.pwm = GPIO.PWM(21, 100)
+        self.pwm.start(5)
 
     def run(self):
         worker = threading.Thread(target=self.queue_worker)
@@ -152,6 +159,24 @@ class MotionController:
                             self.rollx = 0
                             self.pitchy = 0
                             self.yawz = 0
+
+                            #Beak
+                        elif new_command == "open":
+                            self.bodyHeight = 150
+                            sleep(1)
+                            duty = float(40) / 10.0 + 2.5
+                            self.pwm.ChangeDutyCycle(duty)
+                            sleep(1)
+                            self.bodyHeight = 110
+                            sleep(.5)
+                        elif new_command == "close":
+                            self.bodyHeight = 70
+                            sleep(1)
+                            duty = float(16) / 10.0 + 2.5
+                            self.pwm.ChangeDutyCycle(duty)
+                            sleep(1)
+                            self.bodyHeight = 110
+                            sleep(.5)
 
                     except:
                         print("Invalid motion_command")
