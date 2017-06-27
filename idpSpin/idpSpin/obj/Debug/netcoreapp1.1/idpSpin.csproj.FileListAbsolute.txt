@@ -1,0 +1,9 @@
+C:\Users\dklei\Desktop\idpspin\idpSpin\idpSpin\bin\Debug\netcoreapp1.1\idpSpin.deps.json
+C:\Users\dklei\Desktop\idpspin\idpSpin\idpSpin\bin\Debug\netcoreapp1.1\idpSpin.runtimeconfig.json
+C:\Users\dklei\Desktop\idpspin\idpSpin\idpSpin\bin\Debug\netcoreapp1.1\idpSpin.runtimeconfig.dev.json
+C:\Users\dklei\Desktop\idpspin\idpSpin\idpSpin\bin\Debug\netcoreapp1.1\idpSpin.dll
+C:\Users\dklei\Desktop\idpspin\idpSpin\idpSpin\obj\Debug\netcoreapp1.1\idpSpin.csprojResolveAssemblyReference.cache
+C:\Users\dklei\Desktop\idpspin\idpSpin\idpSpin\obj\Debug\netcoreapp1.1\idpSpin.AssemblyInfo.cs
+C:\Users\dklei\Desktop\idpspin\idpSpin\idpSpin\bin\Debug\netcoreapp1.1\idpSpin.pdb
+C:\Users\dklei\Desktop\idpspin\idpSpin\idpSpin\obj\Debug\netcoreapp1.1\idpSpin.dll
+C:\Users\dklei\Desktop\idpspin\idpSpin\idpSpin\obj\Debug\netcoreapp1.1\idpSpin.pdb
