@@ -34,7 +34,7 @@ class Vision:
         self.method = "cards"
         self.symbol_brown_egg = None
         self.symbol_white_egg = None
-        self.show_feed = False
+        self.show_feed = True
 
         
 

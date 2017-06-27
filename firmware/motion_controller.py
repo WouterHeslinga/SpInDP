@@ -19,8 +19,8 @@ class MotionController:
 
         self.angle = 0
         self.rotateDirection = "none"
-        self.spanWidth = 130
-        self.bodyHeight = 119
+        self.spanWidth = 110
+        self.bodyHeight = 120
         self.rollx = 0
         self.pitchy = 0
         self.yawz = 0
@@ -145,6 +145,14 @@ class MotionController:
                         elif new_command == "angle":
                             self.angle = new_value
 
+                        elif new_command == "gyro":
+                            new_x = 0
+                            new_y = 0
+                            new_z = 0
+                            self.rollx = 0
+                            self.pitchy = 0
+                            self.yawz = 0
+
                     except:
                         print("Invalid motion_command")
 
@@ -170,7 +178,7 @@ class MotionController:
                             self.angle = int(new_state)
                             self.rotateDirection = "none"
                             self.animation = animations.walk
-                            self.timeout = 0.26
+                            self.timeout = 0.18
                             self.totalKeyframes = 4
                             self.setup_keyframes()
                             self.state = str(new_state)
@@ -230,6 +238,10 @@ class MotionController:
                             self.timeout = .3
                             self.totalKeyframes = 2
                             self.state = str(new_state)
+
+                        elif new_state == "dance":
+                            self.angle = 0
+                            self.an
 
 
             self.event.wait(.1)   
