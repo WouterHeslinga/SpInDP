@@ -58,7 +58,7 @@ if __name__ == '__main__':
         worker.start()
 
     while should_run:   
-        event.wait(1)
+        event.wait(2)
         if not queue_main.empty():
             commands = queue_main.get()
             if 'temps' in commands:
@@ -66,7 +66,7 @@ if __name__ == '__main__':
             if 'objectcoords' in commands:
                 queue_motion.put({'motion_state': commands['objectcoords']})
             if 'egg' in commands:
-                queue_motion.put({'egg': commands['objectcoords']})
+                queue_motion.put({'egg': commands['egg']})
 
     try:
         while should_run:   
@@ -78,6 +78,8 @@ if __name__ == '__main__':
                     queue_bluetooth.put({'servo_info': commands['servo_info']})
                 elif 'motion_state' in commands:
                     queue_motion.put({'motion_state': commands['motion_state']})
+                elif 'motion_state' in commands:
+                    queue_motion.put({'motion_command': commands['motion_command']})
 
     except KeyboardInterrupt:
         print('closing bluetooth')
