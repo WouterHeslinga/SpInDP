@@ -30,10 +30,10 @@ class Vision:
         self.send_data_worker = threading.Thread(target=self.send_data)
         self.send_data_worker.start()
 
-        self.method = "cards"
-        self.symbol_brown_egg = None
-        self.symbol_white_egg = None
-        self.show_feed = True        
+        self.method = "brownegg"
+        self.symbol_brown_egg = "spade"
+        self.symbol_white_egg = "club"
+        self.show_feed = False        
 
         #Variables for finding objects
         self.balloonRadius = 100
@@ -126,8 +126,9 @@ class Vision:
 
         if found_contour is not None:
             print("Found %s moving towards it" % self.object_to_find)
-            if self.distance < 250 and self.distance > 0:
-                self.data = "height,150"
+            if radius > 75:
+                #if self.distance < 250 and self.distance > 0:
+                self.data = "height,110"
                 print("High mode for dropping of the egg")
                 sleep(2)
                 print("dropping the egg")
@@ -159,18 +160,18 @@ class Vision:
         
         return largest_contour
 
-    def close():
+    def close(self):
         print("closing beak")
         for i in range(6):
             duty = float(40- (i * 4)) / 10.0 + 2.5
-            pwm.ChangeDutyCycle(duty)
+            self.pwm.ChangeDutyCycle(duty)
             sleep(0.05)
     
-    def open():
+    def open(self):
         print("opening beak")
         for i in range(6):
             duty = float(16+ (i * 4)) / 10.0 + 2.5
-            pwm.ChangeDutyCycle(duty)
+            self.pwm.ChangeDutyCycle(duty)
             sleep(0.05)    
 
     #New method only calculates stuff for the largest contour in the frame
@@ -211,7 +212,7 @@ class Vision:
                     print("Currently looking for white egg")
 
                 if radius > self.eggRadius:
-                    self.data = "height,70"
+                    self.data = "height,85"
                     sleep(1)
                     self.close()
 
@@ -305,11 +306,14 @@ class Vision:
                 continue
 
             #Send values
-            if "height" in self.data:
+            elif "height" in self.data:
                 self.queue_main.put({'motion_command' : self.data})
             else:
                 self.queue_main.put({'objectcoords': self.data})
-            self.event.wait(1)
+
+
+            print(str(self.data))
+            self.event.wait(10)
     
     def release(self):
         self.vs.stop()

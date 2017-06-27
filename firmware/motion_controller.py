@@ -169,8 +169,8 @@ class MotionController:
                         angleValue = int(new_state)
                         # update current walk state with new angle
                         if self.state == "walk":
-                            if angleValue - self.angle > -5 and angleValue - self.angle < 5:
-                                continue
+                            #if angleValue - self.angle > -5 and angleValue - self.angle < 5:
+                            #    continue
                             self.angle = angleValue
 
                         # activate walk state   
