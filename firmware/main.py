@@ -6,7 +6,7 @@ from motion_controller import MotionController
 from bluetooth_server import BluetoothServer
 from threading import Event
 import sys
-
+import serial
 
 def vision_worker(queue, main_queue):
     """Worker for the vision"""
@@ -46,9 +46,10 @@ if __name__ == '__main__':
     queue_bluetooth = multiprocessing.Queue()
     queue_vision = multiprocessing.Queue()
     bluetooth = BluetoothServer(queue_bluetooth, queue_main, 1)
+    ser = serial.Serial(poort, 115200)
 
     # Create the workers
-    # workers.append(multiprocessing.Process(target=vision_worker, args=(queue_vision, queue_main)))
+    workers.append(multiprocessing.Process(target=vision_worker, args=(queue_vision, queue_main)))
     # workers.append(multiprocessing.Process(target=web_worker, args=(queue_vision_web,)))
     workers.append(multiprocessing.Process(target=motion_controller_worker, args=(queue_motion, queue_main)))
     workers.append(multiprocessing.Process(target=bluetooth_server_worker, args=(bluetooth,)))
@@ -56,25 +57,36 @@ if __name__ == '__main__':
     # Start the workers
     for worker in workers:
         worker.start()
+    
+    while should_run:   
+        event.wait(2)
+        if not queue_main.empty():
+            commands = queue_main.get()
+            if 'temps' in commands:
+                print(commands['temps'])
+            if 'objectcoords' in commands:
+                queue_motion.put({'motion_state': commands['objectcoords']})
+            if 'egg' in commands:
+                queue_vision.put({'egg': commands['egg']})
+        
+        # Distance sensor
+        distance = ser.readline()
+        if(distance > 0)
+            queue_vision.put({'distance': distance})
 
     try:
         while should_run:   
-            #queue_main.put({'motion_state': raw_input("direction: ")})
-            #queue_main.put({'motion_command': raw_input("command: ")})
-            sleep(0.04)
+            queue_main.put({'motion_state': raw_input("direction: ")})
+            sleep(0.1)
             if not queue_main.empty():
                 commands = queue_main.get()
                 if 'servo_info' in commands:
                     queue_bluetooth.put({'servo_info': commands['servo_info']})
-                elif 'motion_command' in commands:
-                    queue_motion.put({'motion_command': commands['motion_command']})
                 elif 'motion_state' in commands:
                     queue_motion.put({'motion_state': commands['motion_state']})
-                elif 'objectcoords' in commands:
-                    queue_motion.put({'motion_state': commands['objectcoords']})
-                elif 'egg' in commands:
-                    queue_vision.put({'egg': commands['egg']})
-
+                elif 'motion_state' in commands:
+                    queue_motion.put({'motion_command': commands['motion_command']})
+    
     except KeyboardInterrupt:
         print('closing bluetooth')
         bluetooth.close()

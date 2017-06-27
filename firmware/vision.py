@@ -26,7 +26,6 @@ class Vision:
         self.data = None
         self.object_to_find = ""
 
-
         #timer for sending data
         self.send_data_worker = threading.Thread(target=self.send_data)
         self.send_data_worker.start()
@@ -34,14 +33,13 @@ class Vision:
         self.method = "cards"
         self.symbol_brown_egg = None
         self.symbol_white_egg = None
-        self.show_feed = True
-
-        
+        self.show_feed = True        
 
         #Variables for finding objects
         self.balloonRadius = 100
-        self.eggRadius = 35
+        self.eggRadius = 50
         self.shapeArea = 1000
+        self.distance = 0
 
         GPIO.setmode(GPIO.BCM)
         GPIO.setup(21, GPIO.OUT)
@@ -66,6 +64,8 @@ class Vision:
                 self.symbol_white_egg = self.shapes[int(split[1])-1]
                 print(self.symbol_white_egg)
                 self.method = "brownegg"
+            elif 'distance' in command:
+                self.distance = commands
             else:
                 print("We didnt get an egg command")
 
@@ -88,7 +88,13 @@ class Vision:
             return ValueError("Couldn't parse the given method")
 
         cv2.waitKey(10)
-
+    
+    def fury_road(self):
+        self.data = "0"
+        sleep(8.56)
+        self.data = "idle"
+        sleep(30)
+        self.data = "0"
     
     # New method
     def process_shape(self, hsv, frame):
@@ -105,6 +111,14 @@ class Vision:
         ((x,y), radius) = cv2.minEnclosingCircle(contour)
         M=cv2.moments(contour)
 
+        if self.show_feed:
+            if self.object_to_find == "heart" or "diamond":
+                cv2.drawContours(frame, found_contour, 0, (0,255,0), 3)
+                self.show_image("shape", red_contours)
+            if self.object_to_find == "spade" or "club":
+                cv2.drawContours(frame, found_contour, 0, (0,255,0), 3)
+                self.show_image("shape", black_contours)
+
         try:
             center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
         except:
@@ -112,7 +126,18 @@ class Vision:
 
         if found_contour is not None:
             print("Found %s moving towards it" % self.object_to_find)
-            self.data = self.offset_center(frame, center)[0]
+            if self.distance < 250 and self.distance > 0:
+                self.data = "height,150"
+                print("High mode for dropping of the egg")
+                sleep(2)
+                print("dropping the egg")
+                self.open()
+                if self.method == "brownegg":
+                    self.method = "whiteegg"
+                if self.method == "whiteegg":
+                    self.method = "brownegg"
+            else:
+                self.data = self.offset_center(frame, center)[0]
         else:
             self.data = "rotate_right"
         
@@ -133,6 +158,20 @@ class Vision:
                 largest_contour = contour
         
         return largest_contour
+
+    def close():
+        print("closing beak")
+        for i in range(6):
+            duty = float(40- (i * 4)) / 10.0 + 2.5
+            pwm.ChangeDutyCycle(duty)
+            sleep(0.05)
+    
+    def open():
+        print("opening beak")
+        for i in range(6):
+            duty = float(16+ (i * 4)) / 10.0 + 2.5
+            pwm.ChangeDutyCycle(duty)
+            sleep(0.05)    
 
     #New method only calculates stuff for the largest contour in the frame
     def get_round_contour(self, hsv, frame):
@@ -174,7 +213,7 @@ class Vision:
                 if radius > self.eggRadius:
                     self.data = "height,70"
                     sleep(1)
-                    self.data = "close"
+                    self.close()
 
                     if self.method == "brownegg":
                         self.found_brown_egg = True
