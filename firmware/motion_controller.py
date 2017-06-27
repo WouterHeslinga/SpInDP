@@ -189,7 +189,8 @@ class MotionController:
                             self.animation = animations.walk
                             self.timeout = 0.15
                             self.totalKeyframes = 4
-                            self.setup_keyframes()
+                            if self.state != "walk" or self.state != "rotate_right":
+                                self.setup_keyframes()
                             self.state = str(new_state)
 
                         elif new_state == "rotate_right":
@@ -198,7 +199,8 @@ class MotionController:
                             self.animation = animations.walk
                             self.timeout = 0.15
                             self.totalKeyframes = 4
-                            self.setup_keyframes()
+                            if self.state != "walk" or self.state != "rotate_left":
+                                self.setup_keyframes()
                             self.state = str(new_state)
 
                         elif new_state == "clap":

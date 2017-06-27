@@ -142,6 +142,7 @@ def walk(keyframe, leg, statusValues):
     radfactor = math.pi / 180
     stepWidthY = stepWidth * math.cos(statusValues[0] * radfactor)
     stepWidthX = stepWidth * math.sin(statusValues[0] * radfactor)
+    print("Y: %d, X: %d" % (stepWidthY, stepWidthX))
 
     
     startPos = [statusValues[2], 0, statusValues[3]]
